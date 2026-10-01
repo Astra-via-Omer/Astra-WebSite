@@ -1,0 +1,63 @@
+name: Deploy Astra public website
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: astra-public-website
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: website-production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+      SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE || 'astra-website' }}
+      RUNTIME_ACCOUNT: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Validate website
+        run: |
+          npm ci
+          npm audit --omit=dev --audit-level=high
+          npm run build
+      - name: Check deployment configuration
+        run: |
+          for variable in PROJECT REGION REPOSITORY RUNTIME_ACCOUNT; do
+            test -n "${!variable}" || { echo "Missing deployment variable: $variable"; exit 1; }
+          done
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db
+      - name: Build and push
+        run: |
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker build -t "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA" .
+          docker push "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA"
+      - name: Deploy public website
+        run: |
+          gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA" --service-account "$RUNTIME_ACCOUNT" --port 8080 --cpu 1 --memory 512Mi --min-instances 0 --max-instances 3 --concurrency 80 --quiet
+      - name: Verify service
+        run: |
+          URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
+          curl --fail --retry 5 --retry-delay 3 "$URL/health"
+          echo "Website: $URL" >> "$GITHUB_STEP_SUMMARY"
