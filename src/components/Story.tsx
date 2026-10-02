@@ -1,10 +1,16 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { chapters } from '@/data/chapters';
+import ReadingStory from './ReadingStory';
+import { SiteHeader, SiteFooter, useMotion } from './SiteChrome';
 const clamp = (v:number) => Math.max(0,Math.min(1,v));
 // Smootherstep keeps velocity and acceleration gentle at both ends.
 const ease = (v:number) => v*v*v*(v*(v*6-15)+10);
 export default function Story(){
+  const {quiet}=useMotion();
+  return quiet ? <ReadingStory /> : <AnimatedStory />;
+}
+function AnimatedStory(){
   const world=useRef<HTMLDivElement>(null), bar=useRef<HTMLDivElement>(null);
   const scenes=useRef<(HTMLDivElement|null)[]>([]);
   const activeRef=useRef(0), focusRef=useRef(false), reducedRef=useRef(false);
@@ -66,13 +72,14 @@ export default function Story(){
       </div>)}
       <div className="transition-glow"/><div className="particles">{Array.from({length:18},(_,i)=><i key={i} style={{left:(i*43%97)+'%',top:(i*31%91)+'%','--depth':(i%4+1)*.3} as React.CSSProperties}/>)}</div><div className="world-vignette"/>
     </div>
-    <header className="immersive-header"><a href="#begin" aria-label="Astra-Via home"><img src="/astra-logo.svg" alt="Astra-Via" width="150" height="36"/></a><span>WEB3 · RESULT AS A SERVICE</span><button onClick={()=>go(9)}>Explore Astra ↗</button></header>
+    <SiteHeader active="journey" />
+    <noscript><a className="no-script" href="/story">Read the complete story without JavaScript</a></noscript>
     <div className="journey-distance" aria-label="Astra-Via story">{chapters.map((c,i)=><section className="journey-stop" id={c.id} key={c.id} aria-label={c.label}><div className="screen-reader-copy">{i===0?<h1>{c.title}</h1>:<h2>{c.title}</h2>}<p>{c.copy}</p><p>{c.detail}</p></div></section>)}</div>
     <div className="focus-point"><button className="focus-target" onClick={()=>{focusRef.current=!focusRef.current;setFocused(focusRef.current);}} aria-expanded={focused} aria-controls="focus-caption" aria-label={focused?'Zoom out of scene':'Move closer to this scene'}><span/>{focused?'Pull back':'Look closer'}</button>{focused&&<p id="focus-caption">{chapters[active].detail}</p>}</div>
-    <footer className="journey-controls" id="journey-controls">
+    <footer className="journey-controls" id="journey-controls" tabIndex={-1}>
       <div className="journey-status" aria-live="polite"><span>{String(active+1).padStart(2,'0')} <small>/ 10</small></span><p>{chapters[active].label}</p></div>
       <nav aria-label="Jump to a scene">{chapters.map((c,i)=><button key={c.id} aria-label={'Scene '+(i+1)+': '+c.label} aria-current={i===active?'step':undefined} onClick={()=>go(i)}><i/></button>)}</nav>
       <div className="journey-direction"><button onClick={()=>go(active-1)} disabled={active===0} aria-label="Previous scene">↑</button><span>{active===9?'Scroll up to revisit':'Scroll to move through the story'}</span><button onClick={()=>go(active+1)} disabled={active===9} aria-label="Next scene">↓</button></div>
-    </footer><div className="journey-progress"><i ref={bar}/></div>
+    </footer><SiteFooter floating /><div className="journey-progress"><i ref={bar}/></div>
   </main>;
 }
