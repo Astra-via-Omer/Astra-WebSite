@@ -3,12 +3,19 @@ import { SiteHeader, SiteFooter } from '@/components/SiteChrome';
 
 export const metadata = {
   title: 'Our team | Astra-via',
-  description: 'Meet Omer Aviad and Yovav Kalifon, part of the team building Astra-via and its approach to inspectable results.'
+  description: 'Meet Omer Aviad, Yovav Kalifon and Michael Longmuir, part of the team building Astra-via and its approach to inspectable results.'
 };
 
-const team = [
+const team: { name: string; initials: string; biography?: string[] }[] = [
   { name: 'Omer Aviad', initials: 'OA' },
-  { name: 'Yovav Kalifon', initials: 'YK' }
+  { name: 'Yovav Kalifon', initials: 'YK' },
+  {
+    name: 'Michael Longmuir', initials: 'ML',
+    biography: [
+      'Michael has spent 4 decades in business, investment and advisory work across the US, UK, Canada, the Middle East, Africa and Asia. He has worked in banking, M&A, manufacturing, telecommunications, technology, healthcare and education, led corporate turnarounds, run 6 businesses and advised on numerous transactions. He has also served as an adviser to a finance minister.',
+      'Now based in London, Michael works with a small number of clients internationally, alongside his private investment activities.'
+    ]
+  }
 ];
 
 export default function Page() {
@@ -21,18 +28,19 @@ export default function Page() {
           <p className="eyebrow">Astra-via / Our team</p>
           <h1 id="team-title">The people<br />behind the path.</h1>
           <p className="page-intro">We’re building Astra-via around a simple idea: a result should come with a path you can inspect.</p>
-          <p className="team-summary">From claims to evidence to reasoning, our work brings the steps behind an assessment into view. Meet Omer Aviad and Yovav Kalifon.</p>
+          <p className="team-summary">From claims to evidence to reasoning, our work brings the steps behind an assessment into view. Meet Omer Aviad, Yovav Kalifon and Michael Longmuir.</p>
           <a className="team-explore" href="#people">Meet the team <span aria-hidden="true">↓</span></a>
         </div>
         <div className="team-orbit" aria-hidden="true"><div className="orbit-core">A</div><i /><i /><i /><span className="orbit-label orbit-claim">Claim</span><span className="orbit-label orbit-evidence">Evidence</span><span className="orbit-label orbit-reasoning">Reasoning</span></div>
       </section>
       <section id="people" className="team-people" aria-labelledby="people-title">
         <div className="team-section-heading"><p className="eyebrow">The people</p><h2 id="people-title">Building Astra-via.</h2></div>
-        <div className="team-grid">{team.map((person, i) => <article key={person.name} className="team-card" aria-labelledby={'person-' + i}>
+        <div className="team-grid">{team.map((person, i) => <article id={person.name.toLowerCase().replaceAll(' ', '-')} key={person.name} className={'team-card' + (person.biography ? ' team-card-bio' : '')} aria-labelledby={'person-' + i}>
           <span className="team-card-number" aria-hidden="true">0{i + 1}</span>
           <div className="team-monogram" aria-hidden="true"><span>{person.initials}</span><i /><i /></div>
-          <p className="eyebrow">Astra-via / Team</p>
+          <div className="team-profile"><p className="eyebrow">Astra-via / Team</p>
           <h3 id={'person-' + i}>{person.name}</h3>
+          {person.biography?.map(paragraph => <p className="team-biography" key={paragraph}>{paragraph}</p>)}</div>
         </article>)}</div>
       </section>
       <section className="team-approach" aria-labelledby="approach-title">
