@@ -14,7 +14,7 @@ Scope: the public Astra-via marketing site only. The document-review application
 
 ## Operator information still required
 
-The user supplied the name “Astra-via”. Before treating the notice as final, confirm the exact registered entity name, company/sole-trader registration number, business/contact address and that `omer@astra-via.com` is monitored for privacy/accessibility requests. The site does not invent a registration number, address or appointed coordinator.
+The user supplied the name “Astra-via”. Before treating the notice as final, confirm the exact registered entity name, company/sole-trader registration number, business/contact address. The user confirmed `support@astra-via.com` as the shared public contact mailbox for privacy/accessibility requests. The site does not invent a registration number, address or appointed coordinator.
 
 Confirm whether a statutory accessibility coordinator is required and, if so, appoint and publish the actual person's required contact details. Confirm physical service accessibility arrangements if relevant. Arrange an independent accessibility review against the applicable Israeli Standard 5568 / service regulations; do not claim an exemption without assessing its conditions.
 
