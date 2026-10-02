@@ -17,15 +17,16 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
   return <MotionContext.Provider value={{ quiet, toggle: () => setQuiet(value => !value) }}>{children}</MotionContext.Provider>;
 }
 export const useMotion = () => useContext(MotionContext);
-export function SiteHeader({ active }: { active?: 'journey' | 'philosophy' }) {
+export function SiteHeader({ active }: { active?: 'journey' | 'philosophy' | 'team' }) {
   const { quiet, toggle } = useMotion();
   return <header className="site-header">
     <Link href="/" aria-label="Astra-via home"><img src="/astra-logo.svg" alt="Astra-via" width="150" height="36" /></Link>
     <nav aria-label="Main navigation">
       <Link href="/" aria-current={active === 'journey' ? 'page' : undefined}>The journey</Link>
       <Link href="/philosophy" aria-current={active === 'philosophy' ? 'page' : undefined}>Philosophy</Link>
-      <button onClick={toggle} aria-pressed={quiet}>Reduce motion <span aria-hidden="true">{quiet ? '✓' : '○'}</span></button>
+      <Link href="/team" aria-current={active === 'team' ? 'page' : undefined}>Our team</Link>
     </nav>
+    <button onClick={toggle} aria-pressed={quiet}>Reduce motion <span aria-hidden="true">{quiet ? '✓' : '○'}</span></button>
   </header>;
 }
 export function SiteFooter({ floating = false }: { floating?: boolean }) {
