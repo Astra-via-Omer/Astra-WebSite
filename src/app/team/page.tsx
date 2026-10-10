@@ -15,7 +15,14 @@ const team: { name: string; initials: string; biography?: string[]; email?: stri
       'Omer has led the design and development of complex software platforms used by customers and organizations worldwide. His experience spans defense technologies, homeland security systems, medical platforms, semiconductor manufacturing systems and large-scale cloud infrastructure.'
     ]
   },
-  { name: 'Yovav Kalifon', initials: 'YK' },
+  {
+    name: 'Yovav Kalifon', initials: 'YK', email: 'yovav@astra-via.com',
+    biography: [
+      'Yovav is a research scientist with a background in physics, semiconductor metrology and technology collaboration. His experience at Nova Ltd. spans work within the CTO group, research and development partnerships, academic relations and public funding.',
+      'He connects industry and academia through collaborative research and funding initiatives in the semiconductor and metrology sectors. His technical work includes materials metrology for advanced semiconductor devices, a topic he has presented at industry conferences.',
+      'Yovav studied at the Weizmann Institute of Science and completed the Mini-MBA for Engineers and Technology Managers at Rutgers Business School.'
+    ]
+  },
   {
     name: 'Michael Longmuir', initials: 'ML', email: 'Michael@astra-via.com',
     biography: [
