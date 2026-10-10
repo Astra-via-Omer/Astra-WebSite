@@ -73,6 +73,8 @@ Astra-Via is presented as pioneering **Web3 RaaS — Result as a Service** for t
 
 The experience presents Astra's story; it does not call the analysis API, accept uploads or collect contact information. Current document review and the broader verification-infrastructure vision are described separately in the copy.
 
+The `/what-we-can-do` page presents the product collection with descriptions, preview status and direct application links. Maintain the list in `src/data/products.ts`. Check capability descriptions against each application's documentation and verify its public URL before publishing an update.
+
 ## References
 
 - [Next.js standalone output](https://nextjs.org/docs/app/api-reference/config/next-config-js/output)

@@ -17,13 +17,14 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
   return <MotionContext.Provider value={{ quiet, toggle: () => setQuiet(value => !value) }}>{children}</MotionContext.Provider>;
 }
 export const useMotion = () => useContext(MotionContext);
-export function SiteHeader({ active }: { active?: 'journey' | 'philosophy' | 'team' | 'demo' }) {
+export function SiteHeader({ active }: { active?: 'journey' | 'philosophy' | 'products' | 'team' | 'demo' }) {
   const { quiet, toggle } = useMotion();
   return <header className="site-header">
     <Link href="/" aria-label="Astra-via home"><img src="/astra-logo.svg" alt="Astra-via" width="150" height="36" /></Link>
     <nav aria-label="Main navigation">
       <Link href="/" aria-current={active === 'journey' ? 'page' : undefined}>The journey</Link>
       <Link href="/philosophy" aria-current={active === 'philosophy' ? 'page' : undefined}>Philosophy</Link>
+      <Link href="/what-we-can-do" aria-current={active === 'products' ? 'page' : undefined}>What we can do</Link>
       <Link href="/team" aria-current={active === 'team' ? 'page' : undefined}>Our team</Link>
       <Link className="demo-nav" href="/demo" aria-current={active === 'demo' ? 'page' : undefined}>Try demo ↗</Link>
     </nav>
@@ -35,6 +36,7 @@ export function SiteFooter({ floating = false }: { floating?: boolean }) {
     <span>© {new Date().getFullYear()} Astra-via</span>
     <nav aria-label="Information and legal">
       <Link href="/story">Reading view</Link>
+      <Link href="/what-we-can-do">What we can do</Link>
       <Link href="/privacy">Privacy & cookies</Link>
       <Link href="/legal">Terms & disclaimer</Link>
       <Link href="/accessibility">Accessibility</Link>
