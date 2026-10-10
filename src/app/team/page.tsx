@@ -6,11 +6,18 @@ export const metadata = {
   description: 'Meet Omer Aviad, Yovav Kalifon and Michael Longmuir, part of the team building Astra-via and its approach to inspectable results.'
 };
 
-const team: { name: string; initials: string; biography?: string[] }[] = [
-  { name: 'Omer Aviad', initials: 'OA' },
+const team: { name: string; initials: string; biography?: string[]; email?: string }[] = [
+  {
+    name: 'Omer Aviad', initials: 'OA', email: 'omer@astra-via.com',
+    biography: [
+      'Omer is a technology leader with more than 25 years of experience in software engineering, system architecture and advanced technology development. He specializes in translating complex ideas into practical systems that deliver real-world value.',
+      'He has held senior architecture and technology leadership roles at global technology companies including NICE (NASDAQ: NICE), Nova Measuring Instruments (NASDAQ: NVMI) and Nanox (NASDAQ: NNOX).',
+      'Omer has led the design and development of complex software platforms used by customers and organizations worldwide. His experience spans defense technologies, homeland security systems, medical platforms, semiconductor manufacturing systems and large-scale cloud infrastructure.'
+    ]
+  },
   { name: 'Yovav Kalifon', initials: 'YK' },
   {
-    name: 'Michael Longmuir', initials: 'ML',
+    name: 'Michael Longmuir', initials: 'ML', email: 'Michael@astra-via.com',
     biography: [
       'Michael has spent 4 decades in business, investment and advisory work across the US, UK, Canada, the Middle East, Africa and Asia. He has worked in banking, M&A, manufacturing, telecommunications, technology, healthcare and education, led corporate turnarounds, run 6 businesses and advised on numerous transactions. He has also served as an adviser to a finance minister.',
       'Now based in London, Michael works with a small number of clients internationally, alongside his private investment activities.'
@@ -40,7 +47,8 @@ export default function Page() {
           <div className="team-monogram" aria-hidden="true"><span>{person.initials}</span><i /><i /></div>
           <div className="team-profile"><p className="eyebrow">Astra-via / Team</p>
           <h3 id={'person-' + i}>{person.name}</h3>
-          {person.biography?.map(paragraph => <p className="team-biography" key={paragraph}>{paragraph}</p>)}</div>
+          {person.biography?.map(paragraph => <p className="team-biography" key={paragraph}>{paragraph}</p>)}
+          {person.email && <a className="team-email" href={'mailto:' + person.email}>{person.email} <span aria-hidden="true">↗</span></a>}</div>
         </article>)}</div>
       </section>
       <section className="team-approach" aria-labelledby="approach-title">
