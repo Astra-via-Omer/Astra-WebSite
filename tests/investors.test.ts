@@ -57,6 +57,8 @@ test('migration is repeatable; RLS blocks direct REST and preserves all existing
     await db.query('insert into public.astra_user_system_access(user_id,email,workflow,lab) values($1,$2,true,true),($3,$4,false,false)', [owner, 'owner@example.invalid', investor, member.email]);
     const migration = await readFile(new URL('../database/006_investor_room.sql', import.meta.url), 'utf8');
     await db.exec(migration); await db.exec(migration);
+    const directory = await readFile(new URL('../database/008_investor_directory.sql', import.meta.url), 'utf8');
+    await db.exec(directory); await db.exec(directory);
     const approvals = (await db.query<{investor_room:boolean;workflow:boolean;lab:boolean}>('select * from public.astra_user_system_access where user_id=$1', [owner])).rows[0];
     assert.equal(approvals.investor_room, false); assert.equal(approvals.workflow, true); assert.equal(approvals.lab, true);
     await db.query('update public.astra_user_system_access set investor_room=true where user_id=$1', [investor]);
@@ -74,5 +76,14 @@ test('migration is repeatable; RLS blocks direct REST and preserves all existing
     await db.exec('set role service_role');
     await assert.rejects(db.query("update public.astra_investor_events set action='forged'"), /permission denied/);
     const found = await db.query("select * from public.astra_investor_find_user('OWNER@EXAMPLE.INVALID')"); assert.equal(found.rows.length, 1);
+    assert.equal((await db.query('select * from public.astra_investor_directory_members()')).rows.length, 1);
+    await db.exec('reset role');
+    await db.query(`update auth.users set raw_app_meta_data=raw_app_meta_data||'{"directory_archived":true}' where id=$1`, [investor]);
+    await db.exec('set role service_role');
+    assert.equal((await db.query('select * from public.astra_investor_directory_members()')).rows.length, 0, 'Archived fixture members are omitted');
+    assert.equal((await db.query('select * from public.astra_investor_members')).rows.length, 1, 'Membership and audit references remain intact');
+    await db.exec('reset role; set role authenticated');
+    await assert.rejects(db.query('select * from public.astra_investor_directory_members()'), /permission denied/);
+
   } finally { await db.close(); }
 });
