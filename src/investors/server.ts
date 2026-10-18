@@ -1,15 +1,17 @@
 import 'server-only';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Storage } from '@google-cloud/storage';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { isIP } from 'node:net';
 import { assertDocument, assertMembership, categories, emailField, limitedBody, RoomError, textField, uuid, type Member, type RoomDocument } from './policy';
 import { preparePdf, watermarkPdf } from './pdf';
+import { mailConfig, sendRecoveryEmail } from './mail';
 
 const tables = { members: 'astra_investor_members', settings: 'astra_investor_settings', documents: 'astra_investor_documents', grants: 'astra_investor_grants', events: 'astra_investor_events', questions: 'astra_investor_questions', shares: 'astra_investor_shares' };
 export const privateHeaders = { 'Cache-Control': 'private, no-store, max-age=0', Pragma: 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex, nofollow, noarchive' };
 export function publicConfig() {
   const enabled = process.env.ASTRA_INVESTOR_ENABLED === 'on' && !!process.env.SUPABASE_URL && !!process.env.SUPABASE_ANON_KEY && !!process.env.SUPABASE_SERVICE_ROLE_KEY && !!process.env.ASTRA_INVESTOR_BUCKET;
-  return { enabled, url: enabled ? process.env.SUPABASE_URL! : '', key: enabled ? process.env.SUPABASE_ANON_KEY! : '', passwordReset: process.env.ASTRA_INVESTOR_PASSWORD_RESET_ENABLED === 'on' };
+  return { enabled, url: enabled ? process.env.SUPABASE_URL! : '', key: enabled ? process.env.SUPABASE_ANON_KEY! : '', passwordReset: enabled && process.env.ASTRA_INVESTOR_PASSWORD_RESET_ENABLED === 'on' && !!mailConfig(process.env.ASTRA_MICROSOFT_MAIL_JSON) };
 }
 function database() {
   if (!publicConfig().enabled) throw new RoomError(503, 'The investor room is being prepared. Please contact support@astra-via.com.');
@@ -20,10 +22,13 @@ export function checked<T>(result: { data: T; error: unknown }): T {
   if (result.error) { console.error('Investor database operation failed'); throw new RoomError(503, 'The operation could not be confirmed. Refresh and try again.'); }
   return result.data;
 }
-export async function context(request: Request): Promise<Context> {
+function assertOrigin(request: Request, required = false) {
   const origin = request.headers.get('origin');
   const expected = process.env.ASTRA_INVESTOR_ORIGIN || 'https://astra-via.com';
-  if (origin && ![expected, ...(process.env.ASTRA_INVESTOR_ADDITIONAL_ORIGINS || '').split(',').filter(Boolean)].includes(origin)) throw new RoomError(403, 'This request came from an unapproved origin.');
+  if ((required && !origin) || (origin && ![expected, ...(process.env.ASTRA_INVESTOR_ADDITIONAL_ORIGINS || '').split(',').filter(Boolean)].includes(origin))) throw new RoomError(403, 'This request came from an unapproved origin.');
+}
+export async function context(request: Request): Promise<Context> {
+  assertOrigin(request);
   const token = request.headers.get('authorization')?.match(/^Bearer ([A-Za-z0-9._-]+)$/)?.[1];
   if (!token || token.length > 10000) throw new RoomError(401, 'Sign in to the investor room.');
   const db = database();
@@ -44,6 +49,40 @@ export async function context(request: Request): Promise<Context> {
   const claims = await db.auth.getClaims(token);
   if (claims.error || !claims.data) throw new RoomError(401, 'The session could not be verified.');
   return { db, member, token, mfa: claims.data.claims.aal === 'aal2', request };
+}
+export async function requestPasswordReset(request: Request) {
+  assertOrigin(request, true);
+  const mail = mailConfig(process.env.ASTRA_MICROSOFT_MAIL_JSON);
+  if (!publicConfig().passwordReset || !mail) throw new RoomError(503, 'Password reset is temporarily unavailable. Contact support@astra-via.com.');
+  let input: unknown;
+  try { input = JSON.parse((await limitedBody(request, 1024)).toString('utf8')); }
+  catch (error) { if (error instanceof RoomError) throw error; throw new RoomError(400, 'Invalid request.'); }
+  const email = emailField(input && typeof input === 'object' && !Array.isArray(input) ? (input as Record<string, unknown>).email : null);
+  // Google HTTPS LB appends client IP and LB IP. Ignore caller-supplied prefix.
+  // Direct Cloud Run requests use the last proxy-appended address instead.
+  const chain = (request.headers.get('x-forwarded-for') || '').split(',').map(v => v.trim());
+  const address = chain.at(-1) === '34.49.17.123' ? chain.at(-2) : chain.at(-1);
+  const key = (kind: string, value: string) => kind + ':' + createHmac('sha256', process.env.SUPABASE_SERVICE_ROLE_KEY!).update(kind + ':' + value).digest('hex');
+  const db = database();
+  const eligible = checked(await db.rpc('astra_investor_reserve_reset', { p_email: email, p_email_key: key('email', email), p_network_key: key('network', address && isIP(address) ? address : 'unknown') })) as { user_id: string; email: string }[];
+  if (eligible[0]) {
+    const member = eligible[0];
+    const event = async (action: string) => checked(await db.from(tables.events).insert({ actor_id: member.user_id, actor_email: member.email, action, details: { source: 'unauthenticated_reset_request' } }));
+    // The actor is the target account; this event does not claim its owner made
+    // the unauthenticated request. No recovery token enters audit/log output.
+    await event('password_reset_requested');
+    try {
+      const generated = await db.auth.admin.generateLink({ type: 'recovery', email: member.email, options: { redirectTo: 'https://astra-via.com/investors' } });
+      if (generated.error || generated.data.user?.id !== member.user_id) throw Error('Reset link could not be generated');
+      await sendRecoveryEmail(mail, member.email, generated.data.properties.hashed_token);
+      await event('password_reset_provider_accepted');
+    } catch {
+      await event('password_reset_failed');
+      console.error('Investor password reset could not be confirmed');
+    }
+  }
+  // Identical response for unknown, blocked, throttled, and eligible accounts.
+  return { ok: true };
 }
 function administrator(ctx: Context) {
   if (ctx.member.role !== 'admin') throw new RoomError(403, 'Investor administrator access is required.');

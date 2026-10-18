@@ -92,9 +92,36 @@ Run `npm test`, `npm run build`, and the production dependency audit first. Keep
 the marketing and investor services on the same image. Supabase credentials
 remain in Secret Manager; no service key is written to source or browser output.
 
-For password reset emails, add `https://astra-via.com/investors` and
-`https://www.astra-via.com/investors` to Supabase Auth redirect URLs. Preserve all
-existing Workspace and other application URLs. Configure custom SMTP for reliable
-external delivery; new investor invitation links do not depend on SMTP.
+### Password recovery through Astra Microsoft 365
 
-Self-service password reset is hidden by default because this Supabase project currently falls back to localhost. Enable `ASTRA_INVESTOR_PASSWORD_RESET_ENABLED=on` only after verifying the investor URLs in Supabase Auth. Until then, the room offers the support contact. Normal password sign-in, custom one-time invitation links and signed-in password changes remain available.
+Apply `database/007_investor_recovery.sql` after migration 006. Add the exact
+`https://astra-via.com/investors` and `https://www.astra-via.com/investors` return
+URLs in Supabase Auth while preserving the shared default Site URL and all other
+applications' entries. The reset endpoint generates a Supabase recovery link and
+sends it using Astra's existing Microsoft Graph mail application. Shared Supabase
+SMTP and email templates are unaffected. Invitation links remain manually shared.
+
+The existing Secret Manager JSON uses `tenantId`, `clientId`, `clientSecret` and
+`sender`. Pin its enabled version with repository variable
+`ASTRA_MICROSOFT_MAIL_SECRET_VERSION`, grant only the investor runtime accessor
+on `astra-microsoft-mail`, and set `ASTRA_INVESTOR_PASSWORD_RESET_ENABLED=on`.
+The workflow preserves both settings on redeployment. The flag defaults off;
+the reset UI also requires valid mail configuration. Retain the existing sender
+restriction in Exchange; this feature does not add Microsoft permissions.
+
+The origin-checked, 1 KB endpoint returns the same success body for eligible,
+unknown, blocked and throttled emails. Atomic database reservations limit requests
+to three per email per hour with a 90-second cooldown, 20 per network per hour,
+and 120 globally per hour. Limit keys are HMACs, not raw IPs or unknown emails;
+rows older than two hours are removed on subsequent requests. Global limits also
+bound abuse if proxy network attribution is unavailable. Only service_role can
+execute the RPC; browser roles cannot read the rate table.
+
+Only confirmed, approved, active and unexpired investor members get a reset email.
+Audit records mark the target account and explicitly label the unauthenticated
+request source. Provider acceptance is recorded separately from confirmed inbox
+delivery. Tokens and credentials never enter application logs or audit records.
+The email uses a fixed HTTPS investor URL and a single-use token in the fragment,
+removed before Supabase verification. The recovery screen opens the password form;
+Supabase MFA and all live investor permissions still apply. Changing a password
+changes that account's shared Supabase password for its other Astra applications.
