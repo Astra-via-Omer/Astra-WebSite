@@ -9,7 +9,7 @@ const tables = { members: 'astra_investor_members', settings: 'astra_investor_se
 export const privateHeaders = { 'Cache-Control': 'private, no-store, max-age=0', Pragma: 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex, nofollow, noarchive' };
 export function publicConfig() {
   const enabled = process.env.ASTRA_INVESTOR_ENABLED === 'on' && !!process.env.SUPABASE_URL && !!process.env.SUPABASE_ANON_KEY && !!process.env.SUPABASE_SERVICE_ROLE_KEY && !!process.env.ASTRA_INVESTOR_BUCKET;
-  return { enabled, url: enabled ? process.env.SUPABASE_URL! : '', key: enabled ? process.env.SUPABASE_ANON_KEY! : '' };
+  return { enabled, url: enabled ? process.env.SUPABASE_URL! : '', key: enabled ? process.env.SUPABASE_ANON_KEY! : '', passwordReset: process.env.ASTRA_INVESTOR_PASSWORD_RESET_ENABLED === 'on' };
 }
 function database() {
   if (!publicConfig().enabled) throw new RoomError(503, 'The investor room is being prepared. Please contact support@astra-via.com.');
