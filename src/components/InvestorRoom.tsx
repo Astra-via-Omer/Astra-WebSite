@@ -20,13 +20,20 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
   const [signedIn, setSignedIn] = useState(false), [state, setState] = useState<State | null>(null), [admin, setAdmin] = useState<Administration | null>(null);
   const [tab, setTab] = useState('documents'), [category, setCategory] = useState('All documents'), [message, setMessage] = useState(''), [error, setError] = useState(''), [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<{ url: string; title: string } | null>(null), [shareDoc, setShareDoc] = useState<Doc | null>(null);
+  const [recovering, setRecovering] = useState(false);
   const [invitation, setInvitation] = useState(''); const generation = useRef(0); const previewUrl = useRef('');
   const closePreview = useCallback(() => { if (previewUrl.current) URL.revokeObjectURL(previewUrl.current); previewUrl.current = ''; setPreview(null); }, []);
   const clearPrivate = useCallback(() => { generation.current++; setState(null); setAdmin(null); setInvitation(''); setShareDoc(null); closePreview(); }, [closePreview]);
   const request = useCallback(async (url: string, options?: RequestInit) => {
     const { data } = await auth!.auth.getSession();
     if (!data.session) throw Error('Sign in to the investor room.');
-    const response = await fetch(url, { ...options, cache: 'no-store', headers: { ...options?.headers, Authorization: `Bearer ${data.session.access_token}` } });
+    const fetchWith = (token: string) => fetch(url, { ...options, cache: 'no-store', headers: { ...options?.headers, Authorization: `Bearer ${token}` } });
+    let response = await fetchWith(data.session.access_token);
+    if (response.status === 401) {
+      const refreshed = await auth!.auth.refreshSession();
+      if (refreshed.data.session && !refreshed.error) response = await fetchWith(refreshed.data.session.access_token);
+      if (response.status === 401) await auth!.auth.signOut({ scope: 'local' });
+    }
     if (!response.ok) {
       if ([401, 403].includes(response.status)) clearPrivate();
       const result = await response.json().catch(() => ({})); throw Error(result.error || 'The request failed. Try again.');
@@ -46,12 +53,13 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
   useEffect(() => {
     if (!auth) return;
     const fragment = new URLSearchParams(location.hash.slice(1));
-    const inviteToken = fragment.get('token_hash'), type = fragment.get('type');
-    if (inviteToken && type === 'invite') {
+    const token = fragment.get('token_hash'), type = fragment.get('type');
+    if (token && (type === 'invite' || type === 'recovery')) {
       history.replaceState(null, '', location.pathname);
-      auth.auth.verifyOtp({ token_hash: inviteToken, type: 'invite' }).then(({ error }) => { if (error) setError('The invitation has expired or was already used. Contact the administrator for help.'); });
+      setRecovering(type === 'recovery');
+      auth.auth.verifyOtp({ token_hash: token, type }).then(({ error }) => { if (error) { setRecovering(false); setError('This account link has expired or was already used. Request a new link or contact the administrator.'); } });
     }
-    const { data } = auth.auth.onAuthStateChange((_event, session) => { setSignedIn(!!session); if (!session) clearPrivate(); });
+    const { data } = auth.auth.onAuthStateChange((event, session) => { setSignedIn(!!session); if (event === 'PASSWORD_RECOVERY') setRecovering(true); if (!session) { setRecovering(false); clearPrivate(); } });
     return () => { data.subscription.unsubscribe(); closePreview(); };
   }, [auth, clearPrivate, closePreview]);
   useEffect(() => {
@@ -117,11 +125,12 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
         <Login auth={auth!} onError={setError} passwordReset={config.passwordReset} />
       </div> : <>
         <div className="ir-account"><span>{state?.member.email || 'Signed in'}{state?.member.organization && ` · ${state.member.organization}`}</span><button onClick={signOut}>Sign out</button></div>
-        {(!state || !state.canRead) && <section className="ir-panel"><SetPassword auth={auth!} /></section>}
+        {recovering && <section className="ir-panel"><h2>Choose a new password</h2><p>Your investor permissions remain subject to approval. If your account uses an authenticator, verify below before saving.</p><SetPassword auth={auth!} initiallyOpen onSaved={() => { setRecovering(false); setMessage('Password updated.'); }} /></section>}
+        {!recovering && (!state || !state.canRead) && <section className="ir-panel"><SetPassword auth={auth!} /></section>}
         {!state ? <section className="ir-panel"><h2>Checking your access</h2><p>Access requires an active invitation and approval. If you need help, contact support@astra-via.com.</p></section> : <>
           {state.needsMfa && <Mfa auth={auth!} onComplete={() => refresh().catch(e => setError(e.message))} />}
-          {!state.canRead && <section className="ir-panel ir-agreement"><p className="eyebrow">BEFORE YOU ENTER</p><h2>Confidentiality agreement</h2>{state.nda.nda_text ? <><div className="ir-nda-text">{state.nda.nda_text}</div><p className="ir-small">Version {state.nda.nda_version}</p><form onSubmit={event => { event.preventDefault(); void run({ action: 'accept-nda', version: state.nda.nda_version }).catch(() => {}); }}><label className="ir-check"><input type="checkbox" required /> I have read and accept this confidentiality agreement.</label><button className="ir-primary" disabled={busy}>Accept and enter</button></form></> : <p>The administrator is preparing the confidentiality agreement. Documents will be available after it is published and accepted.</p>}</section>}
-          {state.canRead && <>
+          {!recovering && !state.canRead && <section className="ir-panel ir-agreement"><p className="eyebrow">BEFORE YOU ENTER</p><h2>Confidentiality agreement</h2>{state.nda.nda_text ? <><div className="ir-nda-text">{state.nda.nda_text}</div><p className="ir-small">Version {state.nda.nda_version}</p><form onSubmit={event => { event.preventDefault(); void run({ action: 'accept-nda', version: state.nda.nda_version }).catch(() => {}); }}><label className="ir-check"><input type="checkbox" required /> I have read and accept this confidentiality agreement.</label><button className="ir-primary" disabled={busy}>Accept and enter</button></form></> : <p>The administrator is preparing the confidentiality agreement. Documents will be available after it is published and accepted.</p>}</section>}
+          {!recovering && state.canRead && <>
             <nav className="ir-tabs" aria-label="Investor room sections">{[['documents', 'Documents'], ['questions', 'Private Q&A'], ['account', 'Account & privacy'], ...(state.admin ? [['admin', 'Manage room']] : [])].map(([key, label]) => <button key={key} aria-current={tab === key ? 'page' : undefined} onClick={() => { setTab(key); if (key === 'admin') refresh(true).catch(e => setError(e.message)); }}>{label}</button>)}</nav>
             {tab === 'documents' && <><div className="ir-library-heading"><div><h2>Document library</h2><p>Materials released to your account. All previews and downloads are personalized.</p></div><label>Category<select value={category} onChange={e => setCategory(e.target.value)}>{['All documents', ...state.categories].map(c => <option key={c}>{c}</option>)}</select></label></div><div className="ir-documents">{state.documents.filter(d => category === 'All documents' || d.category === category).map(doc => <article className="ir-document" key={doc.id}><div className="ir-doc-top"><span className="ir-pdf">PDF</span><span>{doc.category}</span>{state.admin && <small>{doc.published ? 'Published' : 'Draft'}</small>}</div><h3>{doc.title}</h3><p>{doc.description}</p><div className="ir-document-version">Version {doc.version} · {doc.pages} pages</div><div className="ir-doc-actions"><button className="ir-primary" disabled={busy} onClick={() => void openDocument(doc, false)}>Open document ↗</button>{(doc.can_download || state.admin) && <button disabled={busy} onClick={() => void openDocument(doc, true)}>Download PDF</button>}<button disabled={busy} onClick={() => setShareDoc(doc)}>Request colleague access</button></div></article>)}</div>{!state.documents.length && <section className="ir-panel"><h3>Your library is ready for materials</h3><p>{state.admin ? 'Open Manage room to upload PDFs and grant investor access.' : 'No documents have been released to your account yet.'}</p></section>}</>}
             {tab === 'questions' && <section className="ir-panel"><h2>A direct conversation</h2><p>Your questions and replies are visible to you and investor room administrators.</p><form onSubmit={e => void submit(e, 'question')}><label>Your question<textarea name="question" required maxLength={4000} rows={4} /></label><button className="ir-primary" disabled={busy}>Send question</button></form><Questions questions={state.questions} /></section>}
@@ -146,20 +155,42 @@ function Login({ auth, onError, passwordReset }: { auth: SupabaseClient; onError
     if (error) onError('Sign-in failed. Check your credentials and invitation.'); setBusy(false);
   }
   async function reset(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setBusy(true); const form = new FormData(e.currentTarget);
-    const { error } = await auth.auth.resetPasswordForEmail(String(form.get('email')), { redirectTo: location.origin + '/investors' });
-    if (error) onError('The reset request could not be completed. Try again later.'); else setSent(true); setBusy(false);
+    e.preventDefault(); setBusy(true); onError(''); setSent(false); const form = new FormData(e.currentTarget);
+    try {
+      const response = await fetch('/api/investors/reset', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: String(form.get('email')) }) });
+      if (!response.ok) throw Error('Reset request failed');
+      setSent(true);
+    } catch { onError('The reset request could not be completed. Try again later or contact support@astra-via.com.'); }
+    finally { setBusy(false); }
   }
-  return <section className="ir-panel ir-login"><p className="eyebrow">WELCOME BACK</p><h2>Sign in to your room</h2><p>Use your individual invited account.</p><form onSubmit={login}><label>Email address<input name="email" type="email" autoComplete="username" required maxLength={254} /></label><label>Password<input name="password" type="password" autoComplete="current-password" required /></label><button className="ir-primary" disabled={busy}>{busy ? 'Please wait…' : 'Sign in →'}</button></form>{passwordReset ? <details><summary>Forgot your password?</summary><form onSubmit={reset}><label>Account email<input name="email" type="email" autoComplete="email" required /></label><button disabled={busy}>Request password reset</button></form>{sent && <p role="status">If an eligible account exists, password reset instructions will be sent.</p>}</details> : <p className="ir-small">Password help? <a href="mailto:support@astra-via.com?subject=Investor%20Room%20account%20help">Contact investor support</a>.</p>}<p className="ir-small">New investor? Use your invitation link to verify your email, then set a password in Account & privacy.</p></section>;
+  return <section className="ir-panel ir-login"><p className="eyebrow">WELCOME BACK</p><h2>Sign in to your room</h2><p>Use your individual invited account.</p><form onSubmit={login}><label>Email address<input name="email" type="email" autoComplete="username" required maxLength={254} /></label><label>Password<input name="password" type="password" autoComplete="current-password" required /></label><button className="ir-primary" disabled={busy}>{busy ? 'Please wait…' : 'Sign in →'}</button></form>{passwordReset ? <details><summary>Forgot your password?</summary><form onSubmit={reset}><label>Account email<input name="email" type="email" autoComplete="email" maxLength={254} required /></label><button disabled={busy}>Request password reset</button></form>{sent && <p role="status">If an eligible account exists, password reset instructions will be sent.</p>}</details> : <p className="ir-small">Password help? <a href="mailto:support@astra-via.com?subject=Investor%20Room%20account%20help">Contact investor support</a>.</p>}<p className="ir-small">New investor? Use your invitation link to verify your email, then set a password in Account & privacy.</p></section>;
 }
-function SetPassword({ auth }: { auth: SupabaseClient }) {
+function SetPassword({ auth, initiallyOpen = false, onSaved }: { auth: SupabaseClient; initiallyOpen?: boolean; onSaved?: () => void }) {
   const [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
-  return <details><summary>Set or change your password</summary><form onSubmit={async e => { e.preventDefault(); const form = e.currentTarget; const data = new FormData(form); if (data.get('password') !== data.get('confirm')) { setMessage('The passwords do not match.'); return; } setBusy(true); const { error } = await auth.auth.updateUser({ password: String(data.get('password')) }); setMessage(error ? 'The password could not be updated. Try a stronger password or sign in again.' : 'Password updated.'); setBusy(false); if (!error) form.reset(); }}><label>New password<input name="password" type="password" autoComplete="new-password" minLength={12} required /></label><label>Confirm password<input name="confirm" type="password" autoComplete="new-password" minLength={12} required /></label><button disabled={busy}>Save password</button><p role="status">{message}</p></form></details>;
+  return <details open={initiallyOpen || undefined}><summary>Set or change your password</summary><form onSubmit={async e => { e.preventDefault(); const form = e.currentTarget; const data = new FormData(form); if (data.get('password') !== data.get('confirm')) { setMessage('The passwords do not match.'); return; } setBusy(true); const { error } = await auth.auth.updateUser({ password: String(data.get('password')) }); setMessage(error ? 'The password could not be updated. Try a stronger password or sign in again.' : 'Password updated.'); setBusy(false); if (!error) { form.reset(); onSaved?.(); } }}><label>New password<input name="password" type="password" autoComplete="new-password" minLength={12} required /></label><label>Confirm password<input name="confirm" type="password" autoComplete="new-password" minLength={12} required /></label><button disabled={busy}>Save password</button><p role="status">{message}</p></form></details>;
 }
 function Mfa({ auth, onComplete }: { auth: SupabaseClient; onComplete: () => void }) {
-  const [factor, setFactor] = useState(''), [qr, setQr] = useState(''), [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
-  useEffect(() => { auth.auth.mfa.listFactors().then(({ data }) => { if (data?.totp[0]) setFactor(data.totp[0].id); }); }, [auth]);
-  return <section className="ir-panel"><p className="eyebrow">ADMINISTRATOR VERIFICATION</p><h2>Protect your room with an authenticator</h2><p>Administrator actions require a current two-factor verification.</p>{!factor && <button onClick={async () => { setBusy(true); const { data, error } = await auth.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Astra Investor Room' }); if (error) setMessage(error.message); else { setFactor(data.id); setQr(data.totp.qr_code); } setBusy(false); }} disabled={busy}>Set up authenticator</button>}{qr && <><p>Scan this code with your authenticator app, then enter its six-digit code.</p><img className="ir-qr" src={qr} alt="Personal authenticator enrollment QR code" /></>}{factor && <form onSubmit={async e => { e.preventDefault(); setBusy(true); const code = String(new FormData(e.currentTarget).get('code')); const { error } = await auth.auth.mfa.challengeAndVerify({ factorId: factor, code }); if (error) setMessage('The code could not be verified. Try the current code.'); else onComplete(); setBusy(false); }}><label>Authenticator code<input name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required /></label><button className="ir-primary" disabled={busy}>Verify</button></form>}<p role="status">{message}</p><SetPassword auth={auth} /></section>;
+  const [factor, setFactor] = useState(''), [qr, setQr] = useState(''), [message, setMessage] = useState(''), [busy, setBusy] = useState(false), [loading, setLoading] = useState(true);
+  useEffect(() => { auth.auth.mfa.listFactors().then(({ data, error }) => { const verified = data?.totp.find(f => f.status === 'verified'); if (verified) setFactor(verified.id); if (error) setMessage('Authenticator settings could not be loaded. Refresh and try again.'); setLoading(false); }); }, [auth]);
+  async function enroll() {
+    setBusy(true); setMessage('');
+    try {
+      const { data: factors, error: listError } = await auth.auth.mfa.listFactors();
+      if (listError) throw listError;
+      const verified = factors.totp.find(f => f.status === 'verified');
+      if (verified) { setFactor(verified.id); return; }
+      // A setup abandoned before verification has no usable QR. Restart only
+      // this room's unverified setup, and only on this explicit user action.
+      for (const stale of factors.all.filter(f => f.factor_type === 'totp' && f.status === 'unverified' && f.friendly_name === 'Astra Investor Room')) {
+        const { error } = await auth.auth.mfa.unenroll({ factorId: stale.id }); if (error) throw error;
+      }
+      const { data, error } = await auth.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Astra Investor Room' });
+      if (error) throw error;
+      setFactor(data.id); setQr(data.totp.qr_code);
+    } catch { setMessage('Authenticator setup could not be started. Refresh and try again or contact support.'); }
+    finally { setBusy(false); }
+  }
+  return <section className="ir-panel"><p className="eyebrow">ADMINISTRATOR VERIFICATION</p><h2>Protect your room with an authenticator</h2><p>Administrator actions require a current two-factor verification.</p>{!factor && <><p>If an earlier setup was interrupted, this creates a fresh code for this room.</p><button onClick={enroll} disabled={busy || loading}>Set up authenticator</button></>}{qr && <><p>Scan this code with your authenticator app, then enter its six-digit code.</p><img className="ir-qr" src={qr} alt="Personal authenticator enrollment QR code" /></>}{factor && <form onSubmit={async e => { e.preventDefault(); setBusy(true); const code = String(new FormData(e.currentTarget).get('code')); const { error } = await auth.auth.mfa.challengeAndVerify({ factorId: factor, code }); if (error) setMessage('The code could not be verified. Try the current code.'); else onComplete(); setBusy(false); }}><label>Authenticator code<input name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required /></label><button className="ir-primary" disabled={busy}>Verify</button></form>}<p role="status">{message}</p></section>;
 }
 function Questions({ questions, run, busy }: { questions: Question[]; run?: Run; busy?: boolean }) {
   return <div className="ir-questions">{questions.map(q => <article key={q.id}><p className="ir-small">{run && `${q.email} · `}{date(q.created_at)}</p><h3>{q.question}</h3><p className="ir-answer">{q.answer || 'Awaiting a reply.'}</p>{run && <form onSubmit={e => { e.preventDefault(); void run({ action: 'answer', id: q.id, answer: new FormData(e.currentTarget).get('answer') }).catch(() => {}); }}><label>Private reply<textarea name="answer" defaultValue={q.answer} maxLength={8000} rows={3} required /></label><button disabled={busy}>Save reply</button></form>}</article>)}</div>;
