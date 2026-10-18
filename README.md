@@ -90,3 +90,7 @@ The `/what-we-can-do` page presents the product collection with descriptions, pr
 - Runtime account: `astra-site-runtime@astra-via.iam.gserviceaccount.com`
 - Deployment account: `astra-site-deploy@astra-via.iam.gserviceaccount.com`
 - GitHub authentication: Workload Identity Federation, restricted to repository ID `1400569187`, `main`, and the `website-production` environment. No long-lived Google service-account key is stored in GitHub.
+
+## Investor Room
+
+The Investor Room tab opens the private investor portal at `/investors`, served by an isolated Cloud Run runtime. Supabase controls individual membership and system approval; documents live in a dedicated private Google Cloud Storage bucket. Administrator MFA, versioned confidentiality acceptance, per-investor PDF preview/download grants, server-generated email/time/copy-ID watermarks, private Q&A, approved colleague access and append-only application audit are included. See [operation and deployment details](docs/investor-room.md). No real investor files or confidentiality agreement are published automatically.

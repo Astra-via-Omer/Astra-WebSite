@@ -1,0 +1,47 @@
+export class RoomError extends Error {
+  constructor(public status: number, message: string) { super(message); }
+}
+export const categories = ['Company overview', 'Pitch deck', 'Financials', 'Corporate & legal', 'Product & traction', 'Investor updates'] as const;
+export type Member = {
+  user_id: string; email: string; role: 'investor' | 'admin'; expires_at: string | null;
+  stage: string; nda_version: string | null; organization: string;
+};
+export type RoomDocument = {
+  id: string; title: string; category: string; version: string; description: string;
+  object_path: string; sha256: string; pages: number; bytes: number; published: boolean; created_at: string;
+};
+export function assertMembership(user: { email_confirmed_at?: string; banned_until?: string; app_metadata?: Record<string, unknown> }, approved: boolean, member: Member | null, now = Date.now()) {
+  if (!user.email_confirmed_at || user.app_metadata?.disabled === true || user.app_metadata?.disabled === 'true' ||
+      (user.banned_until && Date.parse(user.banned_until) > now) || !approved || !member ||
+      (member.expires_at !== null && (!Number.isFinite(Date.parse(member.expires_at)) || Date.parse(member.expires_at) <= now))) {
+    throw new RoomError(403, 'Investor room access is not approved, has expired, or has been suspended.');
+  }
+}
+export function assertDocument(member: Member, doc: RoomDocument | null, grant: { can_view: boolean; can_download: boolean } | null, download: boolean) {
+  if (!doc || (member.role !== 'admin' && (!doc.published || !grant?.can_view || (download && !grant.can_download))))
+    throw new RoomError(404, 'This document is unavailable for the requested action.');
+}
+export function textField(value: unknown, max = 200, required = true): string {
+  if (typeof value !== 'string' || value.length > max || /[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(value) || (required && !value.trim()))
+    throw new RoomError(400, 'Check the entered text and its length.');
+  return value.trim();
+}
+export function emailField(value: unknown): string {
+  const email = textField(value, 254).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new RoomError(400, 'Enter a valid email address.');
+  return email;
+}
+export function uuid(value: unknown): string {
+  if (typeof value !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) throw new RoomError(400, 'Invalid record identifier.');
+  return value;
+}
+export async function limitedBody(request: Request, max: number) {
+  if (Number(request.headers.get('content-length')) > max) throw new RoomError(413, 'The request is too large.');
+  if (!request.body) return Buffer.alloc(0);
+  const reader = request.body.getReader(); const chunks: Uint8Array[] = []; let size = 0;
+  try {
+    while (true) { const { done, value } = await reader.read(); if (done) break; size += value.byteLength;
+      if (size > max) { await reader.cancel(); throw new RoomError(413, 'The request is too large.'); } chunks.push(value); }
+  } finally { reader.releaseLock(); }
+  return Buffer.concat(chunks);
+}
