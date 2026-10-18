@@ -36,6 +36,7 @@ jobs:
         run: |
           npm ci
           npm audit --omit=dev --audit-level=high
+          npm test
           npm run build
       - name: Check deployment configuration
         run: |
@@ -61,3 +62,9 @@ jobs:
           URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
           curl --fail --retry 5 --retry-delay 3 "$URL/health"
           echo "Website: $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Deploy the matching investor service
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          SUPABASE_ADMIN_SECRET_VERSION: ${{ vars.SUPABASE_ADMIN_SECRET_VERSION }}
+        run: node scripts/deploy-investors.mjs deploy "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA"
