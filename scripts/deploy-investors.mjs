@@ -28,6 +28,6 @@ if (mode === 'provision') {
     cloud(['compute', 'backend-services', 'create', 'astra-investors-backend', '--global', '--load-balancing-scheme=EXTERNAL_MANAGED', '--protocol=HTTP']);
     cloud(['compute', 'backend-services', 'add-backend', 'astra-investors-backend', '--global', '--network-endpoint-group=astra-investors-neg', '--network-endpoint-group-region=' + region]);
   }
-  cloud(['compute', 'url-maps', 'add-path-matcher', 'astra-website-lb', '--path-matcher-name=astra-site-investors', '--default-service=astra-website-backend', '--backend-service-path-rules=astra-investors-backend=/investors,/investors/*,/api/investors,/api/investors/*', '--new-hosts=astra-via.com,www.astra-via.com']);
+  cloud(['compute', 'url-maps', 'add-path-matcher', 'astra-website-lb', '--path-matcher-name=astra-site-investors', '--default-service=astra-website-backend', '--backend-service-path-rules=/investors=astra-investors-backend,/investors/*=astra-investors-backend,/api/investors=astra-investors-backend,/api/investors/*=astra-investors-backend', '--new-hosts=astra-via.com,www.astra-via.com']);
   console.log('Investor paths routed to the dedicated service.');
 } else throw Error('Use provision, deploy IMAGE, or route.');
