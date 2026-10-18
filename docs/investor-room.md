@@ -96,3 +96,5 @@ For password reset emails, add `https://astra-via.com/investors` and
 `https://www.astra-via.com/investors` to Supabase Auth redirect URLs. Preserve all
 existing Workspace and other application URLs. Configure custom SMTP for reliable
 external delivery; new investor invitation links do not depend on SMTP.
+
+Self-service password reset is hidden by default because this Supabase project currently falls back to localhost. Enable `ASTRA_INVESTOR_PASSWORD_RESET_ENABLED=on` only after verifying the investor URLs in Supabase Auth. Until then, the room offers the support contact. Normal password sign-in, custom one-time invitation links and signed-in password changes remain available.

@@ -15,7 +15,7 @@ type Administration = { members: Person[]; grants: Grant[]; shares: Share[]; eve
 type Run = (action: Record<string, unknown> | FormData) => Promise<Record<string, unknown>>;
 const date = (value: string) => new Date(value).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
-export default function InvestorRoom({ config }: { config: { enabled: boolean; url: string; key: string } }) {
+export default function InvestorRoom({ config }: { config: { enabled: boolean; url: string; key: string; passwordReset: boolean } }) {
   const [auth] = useState<SupabaseClient | null>(() => config.enabled ? createClient(config.url, config.key, { auth: { persistSession: false, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' } }) : null);
   const [signedIn, setSignedIn] = useState(false), [state, setState] = useState<State | null>(null), [admin, setAdmin] = useState<Administration | null>(null);
   const [tab, setTab] = useState('documents'), [category, setCategory] = useState('All documents'), [message, setMessage] = useState(''), [error, setError] = useState(''), [busy, setBusy] = useState(false);
@@ -114,7 +114,7 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
       {error && <div className="ir-notice ir-error" role="alert">{error}</div>}{message && <div className="ir-notice" role="status">{message}</div>}
       {!config.enabled ? <section className="ir-panel"><h2>Private access is being prepared</h2><p>Contact <a href="mailto:support@astra-via.com">support@astra-via.com</a> for investor access.</p></section> : !signedIn ? <div className="ir-login-grid">
         <section className="ir-introduction"><p className="eyebrow">BY INVITATION</p><h2>The information behind<br />the conversation.</h2><p>Company materials, financial information, product updates, and a direct channel for your questions.</p><ol><li><span>01</span> Sign in with your invited email.</li><li><span>02</span> Read and accept the confidentiality agreement.</li><li><span>03</span> Explore the documents approved for you.</li></ol><p className="ir-small">Access is personal. Each PDF copy includes your verified email, date, and a unique copy ID.</p></section>
-        <Login auth={auth!} onError={setError} />
+        <Login auth={auth!} onError={setError} passwordReset={config.passwordReset} />
       </div> : <>
         <div className="ir-account"><span>{state?.member.email || 'Signed in'}{state?.member.organization && ` · ${state.member.organization}`}</span><button onClick={signOut}>Sign out</button></div>
         {(!state || !state.canRead) && <section className="ir-panel"><SetPassword auth={auth!} /></section>}
@@ -138,7 +138,7 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
   </div>;
 }
 
-function Login({ auth, onError }: { auth: SupabaseClient; onError: (text: string) => void }) {
+function Login({ auth, onError, passwordReset }: { auth: SupabaseClient; onError: (text: string) => void; passwordReset: boolean }) {
   const [busy, setBusy] = useState(false), [sent, setSent] = useState(false);
   async function login(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true); onError(''); const form = new FormData(e.currentTarget);
@@ -150,7 +150,7 @@ function Login({ auth, onError }: { auth: SupabaseClient; onError: (text: string
     const { error } = await auth.auth.resetPasswordForEmail(String(form.get('email')), { redirectTo: location.origin + '/investors' });
     if (error) onError('The reset request could not be completed. Try again later.'); else setSent(true); setBusy(false);
   }
-  return <section className="ir-panel ir-login"><p className="eyebrow">WELCOME BACK</p><h2>Sign in to your room</h2><p>Use your individual invited account.</p><form onSubmit={login}><label>Email address<input name="email" type="email" autoComplete="username" required maxLength={254} /></label><label>Password<input name="password" type="password" autoComplete="current-password" required /></label><button className="ir-primary" disabled={busy}>{busy ? 'Please wait…' : 'Sign in →'}</button></form><details><summary>Forgot your password?</summary><form onSubmit={reset}><label>Account email<input name="email" type="email" autoComplete="email" required /></label><button disabled={busy}>Request password reset</button></form>{sent && <p role="status">If an eligible account exists, password reset instructions will be sent.</p>}</details><p className="ir-small">New investor? Use your invitation link to verify your email, then set a password in Account & privacy.</p></section>;
+  return <section className="ir-panel ir-login"><p className="eyebrow">WELCOME BACK</p><h2>Sign in to your room</h2><p>Use your individual invited account.</p><form onSubmit={login}><label>Email address<input name="email" type="email" autoComplete="username" required maxLength={254} /></label><label>Password<input name="password" type="password" autoComplete="current-password" required /></label><button className="ir-primary" disabled={busy}>{busy ? 'Please wait…' : 'Sign in →'}</button></form>{passwordReset ? <details><summary>Forgot your password?</summary><form onSubmit={reset}><label>Account email<input name="email" type="email" autoComplete="email" required /></label><button disabled={busy}>Request password reset</button></form>{sent && <p role="status">If an eligible account exists, password reset instructions will be sent.</p>}</details> : <p className="ir-small">Password help? <a href="mailto:support@astra-via.com?subject=Investor%20Room%20account%20help">Contact investor support</a>.</p>}<p className="ir-small">New investor? Use your invitation link to verify your email, then set a password in Account & privacy.</p></section>;
 }
 function SetPassword({ auth }: { auth: SupabaseClient }) {
   const [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
