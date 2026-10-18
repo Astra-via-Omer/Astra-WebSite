@@ -125,3 +125,7 @@ The email uses a fixed HTTPS investor URL and a single-use token in the fragment
 removed before Supabase verification. The recovery screen opens the password form;
 Supabase MFA and all live investor permissions still apply. Changing a password
 changes that account's shared Supabase password for its other Astra applications.
+
+### Test-account archival
+
+Apply `database/008_investor_directory.sql` with the Workspace directory-archive migration. Protected `app_metadata.directory_archived=true` omits archived synthetic members from normal investor administration while preserving memberships and audit identities. Keep those accounts disabled, banned, expired and unapproved. Ordinary disabled people remain visible. The fixture-creating `tests/live-investors.mjs` requires a separate staging Supabase project/service/bucket and refuses the production project. Read-only/unknown-account `tests/live-recovery.mjs` creates no accounts.

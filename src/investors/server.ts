@@ -100,6 +100,9 @@ async function ndaRequired(ctx: Context) {
 async function audit(ctx: Context, action: string, details: Record<string, unknown> = {}, documentId?: string, copyId?: string) {
   checked(await ctx.db.from(tables.events).insert({ actor_id: ctx.member.user_id, actor_email: ctx.member.email, action, details, document_id: documentId || null, copy_id: copyId || null }));
 }
+async function directoryMembers(ctx: Context) {
+  return (checked(await ctx.db.rpc('astra_investor_directory_members')) || []) as Member[];
+}
 export async function roomState(ctx: Context) {
   const room = await settings(ctx);
   const canRead = ctx.member.role === 'admin' || (!!room.nda_text && !!room.nda_version && ctx.member.nda_version === room.nda_version);
@@ -115,19 +118,19 @@ export async function roomState(ctx: Context) {
       }
     }
   }
-  const questions = canRead ? checked(await (admin ? ctx.db.from(tables.questions).select('*') : ctx.db.from(tables.questions).select('*').eq('user_id', ctx.member.user_id)).order('created_at', { ascending: false }).limit(100)) : [];
+  const questions = canRead ? checked(await (admin ? ctx.db.from(tables.questions).select('*').in('user_id', (await directoryMembers(ctx)).map(m => m.user_id)) : ctx.db.from(tables.questions).select('*').eq('user_id', ctx.member.user_id)).order('created_at', { ascending: false }).limit(100)) : [];
   await audit(ctx, 'room_opened');
   return { member: ctx.member, admin, needsMfa: ctx.member.role === 'admin' && !ctx.mfa, nda: room, canRead, documents: docs, questions, categories };
 }
 export async function adminState(ctx: Context, offset: number) {
   administrator(ctx);
-  const members = checked(await ctx.db.from(tables.members).select('*').order('email')) || [];
+  const members = await directoryMembers(ctx);
   const approvals = checked(await ctx.db.from('astra_user_system_access').select('user_id,investor_room').in('user_id', members.map(m => m.user_id))) || [];
   const events = checked(await ctx.db.from(tables.events).select('*').order('occurred_at', { ascending: false }).order('id').range(offset, offset + 99));
   return {
     members: members.map(m => ({ ...m, approved: approvals.find(a => a.user_id === m.user_id)?.investor_room === true })),
-    grants: checked(await ctx.db.from(tables.grants).select('*')),
-    shares: checked(await ctx.db.from(tables.shares).select('*').order('created_at', { ascending: false }).limit(100)),
+    grants: checked(await ctx.db.from(tables.grants).select('*').in('user_id', members.map(m => m.user_id))),
+    shares: checked(await ctx.db.from(tables.shares).select('*').in('sender_id', members.map(m => m.user_id)).order('created_at', { ascending: false }).limit(100)),
     events, offset,
   };
 }
