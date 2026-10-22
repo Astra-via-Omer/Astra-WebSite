@@ -33,6 +33,28 @@ change the schema; this is not an externally immutable compliance archive.
 
 ## Using the room
 
+The room opens with the Astra observatory: a gravity-well illustration, a personal
+welcome, and chapters about connections, traceability and the philosophy already
+published on the Astra website. The fingerprint is a visual metaphor; the page
+does not collect biometric information.
+
+After sign-in, **Your space** shows the investor's available published materials,
+their personal signature card, and **The Astra Dispatch**. Dispatch entries are
+published PDFs in the existing **Investor updates** category. They appear only
+after the investor also has the required document grant and current agreement.
+Upload, publish and grant these updates using the existing management controls.
+There are no generated company announcements, inferred investment metrics or
+public exposure of private updates. Empty areas explain when material will appear.
+
+The welcome uses the current account's `astra_investor_name`, `full_name`, `name`
+or `display_name`, falling back to a readable email username. **Your account**
+lets a member save their preferred welcome in `user_metadata.astra_investor_name`.
+This is presentation only: access and document watermarks still use the verified
+account email and the existing live permission checks. No database migration is
+needed for the new presentation. Names and private views clear on sign-out or
+access loss. Administrator MFA remains required for management actions; its
+verification form is now in an expandable panel.
+
 1. Sign in at `/investors` and complete authenticator verification as an admin.
 2. Open **Manage room → Confidentiality** and publish your approved agreement.
    No agreement is invented or accepted on your behalf. Investor document access

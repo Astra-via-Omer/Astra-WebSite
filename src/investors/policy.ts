@@ -4,7 +4,7 @@ export class RoomError extends Error {
 export const categories = ['Company overview', 'Pitch deck', 'Financials', 'Corporate & legal', 'Product & traction', 'Investor updates'] as const;
 export type Member = {
   user_id: string; email: string; role: 'investor' | 'admin'; expires_at: string | null;
-  stage: string; nda_version: string | null; organization: string;
+  stage: string; nda_version: string | null; organization: string; display_name?: string;
 };
 export type RoomDocument = {
   id: string; title: string; category: string; version: string; description: string;
