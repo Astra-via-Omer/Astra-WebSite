@@ -22,17 +22,17 @@ export function GravityField() {
     <div className="ir-figure-label"><span>FIG. 01 / THE GRAVITY WELL</span><span aria-hidden="true">[ x, y, ∞ ]</span></div>
     <svg viewBox="0 0 600 380" fill="none" aria-hidden="true">
       <defs>
-        <radialGradient id={`${id}-glow`}><stop stopColor="#7ef5dc" stopOpacity=".25" /><stop offset="1" stopColor="#7ef5dc" stopOpacity="0" /></radialGradient>
-        <linearGradient id={`${id}-mesh`} x1="300" y1="75" x2="300" y2="320" gradientUnits="userSpaceOnUse"><stop stopColor="#89c6bd" stopOpacity=".16" /><stop offset=".6" stopColor="#75d9c8" stopOpacity=".55" /><stop offset="1" stopColor="#a2ffe8" stopOpacity=".9" /></linearGradient>
+        <radialGradient id={`${id}-glow`}><stop stopColor="#2be8f5" stopOpacity=".25" /><stop offset="1" stopColor="#2be8f5" stopOpacity="0" /></radialGradient>
+        <linearGradient id={`${id}-mesh`} x1="300" y1="75" x2="300" y2="320" gradientUnits="userSpaceOnUse"><stop stopColor="#8cd9ec" stopOpacity=".16" /><stop offset=".6" stopColor="#58cddb" stopOpacity=".55" /><stop offset="1" stopColor="#a4f1f5" stopOpacity=".9" /></linearGradient>
       </defs>
       <ellipse cx="300" cy="244" rx="220" ry="125" fill={`url(#${id}-glow)`} className="ir-well-glow" />
       <g stroke={`url(#${id}-mesh)`} strokeWidth=".65">{rings.map((d, i) => <path d={d} key={`r${i}`} />)}{spokes.map((d, i) => <path d={d} key={`s${i}`} />)}</g>
-      <ellipse cx="300" cy="156" rx="279" ry="108" stroke="#a0d5c5" strokeOpacity=".12" strokeDasharray="2 7" />
-      <path d="M300 40V105M300 310V343M17 156H47M553 156H583" stroke="#a0d5c5" strokeOpacity=".4" />
-      <circle cx="300" cy="296" r="5" fill="#c2ffea" /><circle cx="300" cy="296" r="13" stroke="#b4ffe5" strokeOpacity=".5" className="ir-core-ring" />
-      {[[113, 123], [457, 98], [501, 214], [198, 229]].map(([x, y], i) => <g key={x}><circle cx={x} cy={y} r="3" fill={i === 1 ? '#e7c798' : '#b4ffe5'} /><circle cx={x} cy={y} r="8" stroke="#b4ffe5" strokeOpacity=".22" /></g>)}
-      <g stroke="#8ac3b2" strokeOpacity=".3"><path d="M113 123L79 90H36M457 98L492 57H551M501 214L540 245H574" /></g>
-      <g fill="#91b4ad" fontSize="8" fontFamily="monospace" letterSpacing="1.4"><text x="35" y="80">CLAIM</text><text x="501" y="47">SOURCE</text><text x="524" y="262">REASONING</text></g>
+      <ellipse cx="300" cy="156" rx="279" ry="108" stroke="#8cd9ec" strokeOpacity=".12" strokeDasharray="2 7" />
+      <path d="M300 40V105M300 310V343M17 156H47M553 156H583" stroke="#8cd9ec" strokeOpacity=".4" />
+      <circle cx="300" cy="296" r="5" fill="#e4fdff" /><circle cx="300" cy="296" r="13" stroke="#a4f1f5" strokeOpacity=".5" className="ir-core-ring" />
+      {[[113, 123], [457, 98], [501, 214], [198, 229]].map(([x, y], i) => <g key={x}><circle cx={x} cy={y} r="3" fill={i === 1 ? '#f5f9ff' : '#a4f1f5'} /><circle cx={x} cy={y} r="8" stroke="#a4f1f5" strokeOpacity=".22" /></g>)}
+      <g stroke="#85b4c5" strokeOpacity=".3"><path d="M113 123L79 90H36M457 98L492 57H551M501 214L540 245H574" /></g>
+      <g fill="#9db7c9" fontSize="8" fontFamily="monospace" letterSpacing="1.4"><text x="35" y="80">CLAIM</text><text x="501" y="47">SOURCE</text><text x="524" y="262">REASONING</text></g>
     </svg>
     <figcaption><span>Connections give the picture depth.</span><span aria-hidden="true">ƒ ( evidence )</span></figcaption>
   </figure>;
