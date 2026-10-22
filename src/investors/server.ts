@@ -6,6 +6,7 @@ import { isIP } from 'node:net';
 import { assertDocument, assertMembership, categories, emailField, limitedBody, RoomError, textField, uuid, type Member, type RoomDocument } from './policy';
 import { preparePdf, watermarkPdf } from './pdf';
 import { mailConfig, sendRecoveryEmail } from './mail';
+import { investorDisplayName } from './presentation';
 
 const tables = { members: 'astra_investor_members', settings: 'astra_investor_settings', documents: 'astra_investor_documents', grants: 'astra_investor_grants', events: 'astra_investor_events', questions: 'astra_investor_questions', shares: 'astra_investor_shares' };
 export const privateHeaders = { 'Cache-Control': 'private, no-store, max-age=0', Pragma: 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex, nofollow, noarchive' };
@@ -46,6 +47,7 @@ export async function context(request: Request): Promise<Context> {
   // Watermarks use the freshly verified Auth email, never form input or the
   // membership's display copy of the email.
   member.email = current.data.user.email!;
+  member.display_name = investorDisplayName(member.email, current.data.user.user_metadata);
   const claims = await db.auth.getClaims(token);
   if (claims.error || !claims.data) throw new RoomError(401, 'The session could not be verified.');
   return { db, member, token, mfa: claims.data.claims.aal === 'aal2', request };

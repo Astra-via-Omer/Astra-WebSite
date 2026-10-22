@@ -70,3 +70,5 @@ jobs:
           ASTRA_INVESTOR_PASSWORD_RESET_ENABLED: ${{ vars.ASTRA_INVESTOR_PASSWORD_RESET_ENABLED }}
           ASTRA_MICROSOFT_MAIL_SECRET_VERSION: ${{ vars.ASTRA_MICROSOFT_MAIL_SECRET_VERSION }}
         run: node scripts/deploy-investors.mjs deploy "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA"
+      - name: Verify public website and investor assets
+        run: node scripts/check-public-assets.mjs

@@ -27,7 +27,7 @@ export function SiteHeader({ active }: { active?: 'journey' | 'philosophy' | 'pr
       <Link href="/what-we-can-do" aria-current={active === 'products' ? 'page' : undefined}>What we can do</Link>
       <Link href="/team" aria-current={active === 'team' ? 'page' : undefined}>Our team</Link>
       <Link href="/investors" aria-current={active === 'investors' ? 'page' : undefined}>Investor Room</Link>
-      <Link className="demo-nav" href="/demo" aria-current={active === 'demo' ? 'page' : undefined}>Try demo ↗</Link>
+      <Link className="demo-nav" href="/register">Create free account ↗</Link>
     </nav>
     <button onClick={toggle} aria-pressed={quiet}>Reduce motion <span aria-hidden="true">{quiet ? '✓' : '○'}</span></button>
   </header>;
