@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { SiteHeader, SiteFooter } from '@/components/SiteChrome';
 
 export const metadata = {
@@ -62,11 +61,11 @@ export default function Page() {
         <p className="eyebrow">What brings us together</p>
         <h2 id="approach-title">Make the reasoning visible.<br />Keep the questions open.</h2>
         <p>Our Result as a Service approach starts with document review: connecting claims to their sources, explaining the reasoning and showing what still needs validation. Our Web3 roadmap explores how provenance and portable results can extend that path.</p>
-        <div className="team-links"><Link href="/story">Explore our approach ↗</Link><Link href="/philosophy">Explore our philosophy ↗</Link></div>
+        <div className="team-links"><a href="/story">Explore our approach ↗</a><a href="/philosophy">Explore our philosophy ↗</a></div>
       </section>
       <section className="team-contact" aria-labelledby="contact-title">
         <div><p className="eyebrow">Start a conversation</p><h2 id="contact-title">Connect with the team.</h2><p>Reach us through our shared support inbox.</p></div>
-        <div><a className="team-email" href="mailto:support@astra-via.com">support@astra-via.com <span aria-hidden="true">↗</span></a><p className="team-contact-note">We’ll use the details you send to respond. Please avoid sending confidential or sensitive documents. <Link href="/privacy">Privacy & cookies</Link></p></div>
+        <div><a className="team-email" href="mailto:support@astra-via.com">support@astra-via.com <span aria-hidden="true">↗</span></a><p className="team-contact-note">We’ll use the details you send to respond. Please avoid sending confidential or sensitive documents. <a href="/privacy">Privacy & cookies</a></p></div>
       </section>
     </main>
     <SiteFooter />
