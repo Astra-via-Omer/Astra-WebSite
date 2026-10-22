@@ -92,6 +92,16 @@ Run `npm test`, `npm run build`, and the production dependency audit first. Keep
 the marketing and investor services on the same image. Supabase credentials
 remain in Secret Manager; no service key is written to source or browser output.
 
+The load balancer routes `/_next/static/*` to the marketing runtime, including
+requests made by investor pages. Deploying only one runtime can leave investor
+HTML pointing at missing script hashes and cause a client-side application error.
+Both the GitHub workflow and `deploy.sh` update the two services together. The
+manual script updates only the investor image, preserving its private settings.
+Both deployment paths run `node scripts/check-public-assets.mjs` after the paired
+update. This checks `/` and `/investors` on both public hostnames, including the
+status, MIME type and content of their referenced Next.js scripts and styles.
+A runtime `/health` response alone does not verify this cross-service routing.
+
 ### Password recovery through Astra Microsoft 365
 
 Apply `database/007_investor_recovery.sql` after migration 006. Add the exact
