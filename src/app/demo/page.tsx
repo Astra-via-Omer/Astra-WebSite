@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { SiteHeader, SiteFooter } from '@/components/SiteChrome';
 
 export const metadata = {
@@ -24,9 +23,9 @@ export default function Page() {
       <aside className="demo-preview-notice" aria-labelledby="preview-title">
         <p className="eyebrow">Before you begin</p><h2 id="preview-title">A preview for exploration.</h2>
         <ul><li>Source access requires an active demo account. <a href="mailto:support@astra-via.com?subject=Astra%20workspace%20demo%20access">Request demo access</a> through our shared support inbox.</li><li>The workspace currently labels PDF and notes storage as a temporary session: they clear on reload or close. Secure persistent storage is planned.</li><li>Automated AI analysis is not available in the current preview. This demo explores source reading and evidence organization; it does not independently verify claims or deliver a completed AI assessment.</li><li>Start with the built-in example. Avoid confidential, personal or sensitive documents, and keep your own copies of anything you need.</li></ul>
-        <p>Questions or feedback? <a href="mailto:support@astra-via.com">support@astra-via.com</a>. We use the details you send to respond. <Link href="/privacy">Privacy & cookies</Link>.</p>
+        <p>Questions or feedback? <a href="mailto:support@astra-via.com">support@astra-via.com</a>. We use the details you send to respond. <a href="/privacy">Privacy & cookies</a>.</p>
       </aside>
-      <div className="demo-bottom"><Link href="/story">Revisit the Astra approach</Link><a className="demo-launch" href="https://workspace.astra-via.com/">Explore the demo <span aria-hidden="true">↗</span></a></div>
+      <div className="demo-bottom"><a href="/story">Revisit the Astra approach</a><a className="demo-launch" href="https://workspace.astra-via.com/">Explore the demo <span aria-hidden="true">↗</span></a></div>
     </main><SiteFooter />
   </div>;
 }

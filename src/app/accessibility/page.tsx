@@ -1,4 +1,5 @@
 import LegalPage from '@/components/LegalPage';
+import { HebrewContent } from '@/components/RegionalNotice';
 export const metadata = { title: 'Accessibility | Astra-via' };
 export default function Page() {
   return <LegalPage title="Accessibility" intro="Ways to browse the site comfortably and request help or report a barrier.">
@@ -8,11 +9,13 @@ export default function Page() {
       <h3>Review and limitations</h3><p>The site has an immersive visual version as well as a separate reading version. The reading view is recommended if fixed backgrounds or visual transitions interfere with reading. We continue to review keyboard navigation, narrow screens and text reflow. A full independent accessibility audit and testing with a range of assistive technologies have not yet been completed. Third-party source websites are outside our control.</p>
       <h3>Contact and alternative formats</h3><p>For accessibility assistance or to report a barrier, email <a href="mailto:support@astra-via.com?subject=Website%20accessibility">support@astra-via.com</a>, our current accessibility contact channel. If possible, include the page URL, the task you attempted, your browser/device and the format or assistance you need. You do not need to disclose a diagnosis. We will review the report and discuss a suitable way to provide the information.</p>
     </article>
+    <HebrewContent>
     <article id="hebrew" lang="he" dir="rtl"><h2>עברית</h2>
       <h3>מטרת ההנגשה והיקפה</h3><p>Astra-via פועלת להנגשת האתר הציבורי בהתאם לתקנות נגישות השירות ולתקן הישראלי ת״י 5568 ברמה AA. ההצהרה מתייחסת למסע, לעמוד הפילוסופיה, לעמוד הצוות, לעמוד ההיכרות עם הדמו, לתצוגת הקריאה ולעמודי המידע. היא מתארת התאמות שבוצעו ומגבלות נוכחיות, ואינה אישור עצמאי לעמידה מלאה.</p>
       <h3>אפשרויות גלישה</h3><ul><li>כפתור <strong>Reduce motion</strong> בניווט עוצר את התצוגה המונפשת. המסע הופך לדף קריאה רגיל והרקע בעמוד הפילוסופיה נעשה קבוע.</li><li>האתר מכבד את העדפת הפחתת התנועה של מערכת ההפעלה. גם במסכים בעלי גובה נמוך מופעלת תצוגת קריאה כדי לסייע בגלישה בהגדלה ובמצב רוחבי.</li><li><a href="/story">תצוגת הקריאה</a> כוללת את כל פרקי המסע ואת טקסט ההסבר ללא סצנות קבועות.</li><li>ניתן לנווט באמצעות Tab ו-Shift+Tab, להפעיל קישורים ב-Enter וכפתורים ב-Enter או ברווח. קיימים סימון מיקוד וקישור לדילוג.</li><li>כותרות, אזורי ניווט ומאפייני שפה מספקים מבנה. איורים דקורטיביים מוסתרים מקוראי מסך וההסברים מוצגים כטקסט HTML שניתן לבחור.</li><li>אפשר להשתמש בהגדלה ובשינוי גודל טקסט בדפדפן. עמודי המידע מותאמים לזרימת טקסט, לרבות בעברית. אין שמע, הבהובים או משימות מוגבלות בזמן.</li></ul>
       <h3>בדיקה ומגבלות</h3><p>באתר קיימת תצוגה חזותית חווייתית לצד תצוגת קריאה נפרדת. אם רקעים קבועים או מעברים מפריעים לקריאה, מומלץ לבחור בתצוגת הקריאה. נמשכת בדיקת ניווט מקלדת, מסכים צרים וזרימת טקסט. טרם הושלמו ביקורת נגישות עצמאית מלאה ובדיקות במגוון טכנולוגיות מסייעות. אתרי מקורות של צדדים שלישיים אינם בשליטתנו.</p>
       <h3>פניות וחלופות</h3><p>לסיוע בנגישות או לדיווח על חסם: <a href="mailto:support@astra-via.com?subject=Website%20accessibility">support@astra-via.com</a>, ערוץ הקשר הנוכחי בנושא נגישות. ככל שניתן, ציינו את כתובת הדף, הפעולה שניסיתם לבצע, הדפדפן והמכשיר, ואת הפורמט או הסיוע המבוקשים. אין צורך למסור אבחנה רפואית. נבחן את הפנייה ואת הדרך המתאימה למסירת המידע.</p>
     </article>
+    </HebrewContent>
   </LegalPage>;
 }

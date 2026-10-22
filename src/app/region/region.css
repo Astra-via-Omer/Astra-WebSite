@@ -1,0 +1,14 @@
+.region-form{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin:28px 0}
+.region-form label{font-size:17px}
+.region-form select,.region-form button,.privacy-button,.privacy-actions button{font:inherit;color:var(--white);background:var(--navy);border:1px solid #92b7cb;border-radius:8px;padding:12px 16px;min-height:44px}
+.region-form select{max-width:100%}
+.region-form select:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
+.privacy-choices label{display:flex;align-items:center;gap:12px;min-height:44px;line-height:1.6;margin:12px 0}
+.privacy-choices input{width:20px;height:20px;flex-shrink:0;accent-color:var(--cyan)}
+.privacy-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.privacy-actions a{display:inline-flex;align-items:center;min-height:44px;text-decoration:underline;text-underline-offset:4px}
+.consent-banner{position:fixed;bottom:20px;left:20px;right:20px;z-index:90;max-height:70dvh;overflow:auto;background:var(--navy);color:var(--white);border:1px solid #92b7cb;border-radius:12px;padding:24px;box-shadow:0 6px 40px #0009}
+.consent-banner h2{font-size:22px;font-weight:400;margin:0 0 12px}
+.consent-banner p{font-size:16px;line-height:1.6;margin:0 0 16px}
+@media(max-width:600px){.consent-banner{left:12px;right:12px;bottom:12px;padding:18px}.privacy-actions button{width:100%}.region-form{align-items:stretch;flex-direction:column}}
+@media print{.consent-banner{display:none}}

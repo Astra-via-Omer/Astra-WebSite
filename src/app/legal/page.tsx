@@ -1,4 +1,5 @@
 import LegalPage from '@/components/LegalPage';
+import { HebrewContent } from '@/components/RegionalNotice';
 export const metadata = { title: 'Terms & disclaimer | Astra-via' };
 export default function Page() {
   return <LegalPage title="Terms & disclaimer" intro="The scope of this website, the limits of its content and your protected rights.">
@@ -11,6 +12,7 @@ export default function Page() {
       <h3>Availability and limitations of responsibility</h3><p>We aim to keep the site accurate and available, but material may become outdated and the site may be interrupted. To the extent permitted by applicable law, we do not give a contractual warranty of uninterrupted availability or completeness of informational content. Any claim concerning the site must be assessed under applicable law and the relevant circumstances.</p><p>Nothing on this website excludes responsibility that cannot lawfully be excluded, waives mandatory consumer, privacy or accessibility rights, or prevents a person from contacting a regulator or pursuing an available legal remedy. There is no blanket waiver of claims, compulsory arbitration or class-action waiver. These notices do not create rights to mislead users or avoid statutory obligations.</p>
       <h3>Applicable law and notices</h3><p>Israeli law applies subject to any mandatory rules that also apply; the competent court and available remedies are determined by applicable law. No exclusive forum is imposed by this notice. Updates apply to the website information from their publication and do not retroactively remove rights. Browsing alone is not acceptance of a separate paid-service contract.</p>
     </article>
+    <HebrewContent>
     <article id="hebrew" lang="he" dir="rtl"><h2>עברית</h2>
       <h3>מטרת האתר</h3><p>אתר ציבורי זה מופעל בשם Astra-via בישראל. הוא מציג את הגישה שלנו ל-Result as a Service ‏(RaaS), לסקירת מסמכים ולתוכנית Web3. מדובר במידע, ולא באתר רכישה, הצעת השקעה, מכירת אסימונים או הסכם לאספקת שירות מסוים. מוצר או שירות בתשלום מחייבים הסכם נפרד וגילויים מתאימים.</p>
       <h3>יכולות קיימות ותוכניות עתידיות</h3><p>תיאור תוכנית הפיתוח מבטא כוונות שעשויות להשתנות ואינו הבטחה למועד או ליכולת. תיעוד מקור באמצעות בלוקצ׳יין ואחסון ראיות מבוזר הם יכולות מתוכננות. האיורים מציגים רעיונות ולא ממשקי מוצר פעילים. אין טענה לאישור עצמאי שלפיו Astra-via היא הספקית הראשונה או היחידה בתחום.</p>
@@ -20,5 +22,6 @@ export default function Page() {
       <h3>זמינות וגבולות אחריות</h3><p>אנו שואפים למידע מדויק ולזמינות, אך מידע עשוי להתיישן ופעולת האתר עשויה להיפסק. ככל שהדין מאפשר, לא ניתנת אחריות חוזית לזמינות רציפה או לשלמות תוכן המידע. טענה הנוגעת לאתר תיבחן לפי הדין החל והנסיבות.</p><p>אין באתר כדי לפטור מאחריות שלא ניתן לפטור ממנה כדין, לוותר על זכויות קוגנטיות של צרכנים, פרטיות או נגישות, או למנוע פנייה לרשות או מימוש סעד משפטי זמין. אין ויתור גורף על תביעות, בוררות כפויה או ויתור על הליך ייצוגי. ההודעות אינן מקנות זכות להטעות או להימנע מחובה שבדין.</p>
       <h3>דין חל ועדכונים</h3><p>הדין הישראלי חל בכפוף להוראות מחייבות נוספות ככל שהן חלות. הערכאה המוסמכת והסעדים נקבעים לפי הדין, ללא תניית שיפוט בלעדית בהודעה זו. עדכונים חלים על המידע באתר ממועד פרסומם ואינם שוללים זכויות למפרע. גלישה בלבד אינה קבלת חוזה נפרד לשירות בתשלום.</p>
     </article>
+    </HebrewContent>
   </LegalPage>;
 }

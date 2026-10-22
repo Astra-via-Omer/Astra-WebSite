@@ -91,6 +91,10 @@ The `/what-we-can-do` page presents the product collection with descriptions, pr
 - Deployment account: `astra-site-deploy@astra-via.iam.gserviceaccount.com`
 - GitHub authentication: Workload Identity Federation, restricted to repository ID `1400569187`, `main`, and the `website-production` environment. No long-lived Google service-account key is stored in GitHub.
 
+## Regional website and optional tracking
+
+The website supports Israel, EEA, UK, US and international information through `/region`. Hebrew legal sections are server-rendered only for a trusted Israeli connection estimate; other or unknown connections receive English. Required disclosures stay visible everywhere. Optional Google tags remain disabled until configured, and require separate category choices before any container request. This does not change customer data locations or account permissions. See [regional activation and verification](docs/regional-website.md) for the Google load-balancer trust boundary, runtime switches, GTM container review and separate tenant data-region work.
+
 ## Investor Room
 
 The Investor Room tab opens the private investor portal at `/investors`, served by an isolated Cloud Run runtime. Supabase controls individual membership and system approval; documents live in a dedicated private Google Cloud Storage bucket. Administrator MFA, versioned confidentiality acceptance, per-investor PDF preview/download grants, server-generated email/time/copy-ID watermarks, private Q&A, approved colleague access and append-only application audit are included. See [operation and deployment details](docs/investor-room.md). No real investor files or confidentiality agreement are published automatically.

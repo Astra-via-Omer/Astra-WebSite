@@ -23,6 +23,7 @@ jobs:
       REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
       SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE || 'astra-website' }}
       RUNTIME_ACCOUNT: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+      SITE_URL: ${{ vars.ASTRA_PUBLIC_SITE_URL || 'https://astra-via.com' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -59,9 +60,8 @@ jobs:
           gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA" --service-account "$RUNTIME_ACCOUNT" --port 8080 --cpu 1 --memory 512Mi --min-instances 0 --max-instances 3 --concurrency 80 --quiet
       - name: Verify service
         run: |
-          URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
-          curl --fail --retry 5 --retry-delay 3 "$URL/health"
-          echo "Website: $URL" >> "$GITHUB_STEP_SUMMARY"
+          curl --fail --retry 5 --retry-delay 3 "${SITE_URL%/}/health"
+          echo "Website: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"
       - name: Deploy the matching investor service
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
