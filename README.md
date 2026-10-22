@@ -63,7 +63,7 @@ Once the project, region, Artifact Registry repository and runtime account are c
 bash deploy.sh PROJECT_ID REGION ARTIFACT_REPOSITORY RUNTIME_SERVICE_ACCOUNT
 ```
 
-This builds a Linux AMD64 image, pushes it to Artifact Registry, deploys only the public website and prints its verified URL.
+This builds a Linux AMD64 image, pushes it to Artifact Registry, and updates the public website and the existing investor service to that same image. The investor update preserves its environment, secrets and runtime settings. Provision the investor service first as described in [Investor Room deployment](docs/investor-room.md). After deployment, it checks the home and investor pages and every referenced Next.js script/style through both public hostnames, then prints the verified website URL.
 
 ## Positioning
 
