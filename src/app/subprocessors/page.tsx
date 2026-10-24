@@ -1,0 +1,18 @@
+import LegalPage from '@/components/LegalPage';
+export const metadata = { title: 'Service providers & locations | Astra-via' };
+export default function Page() {
+  return <LegalPage title="Service providers & locations" intro="Current service providers and data locations. Customer agreements may impose additional restrictions.">
+    <article id="english" lang="en"><h2>English</h2>
+      <h3>Google Cloud</h3><p>Application hosting, private source/report storage, operational databases, backups and security logs: Israel (me-west1). Document text AI processing: Vertex AI EU regional processing endpoint. Public IPFS node and its backups: United States; optional public publication can be replicated globally. Google is a US-based provider and its support and service operations can involve other locations. <a href="https://cloud.google.com/terms/data-processing-addendum">Data processing terms</a>.</p>
+      <h3>Supabase</h3><p>Authentication, account permissions and application/investor records: project hosting in London, United Kingdom (eu-west-2). Supabase is a Singapore-based provider with international service operations. <a href="https://supabase.com/legal/dpa">Data processing terms</a>.</p>
+      <h3>Microsoft 365</h3><p>Business correspondence, support and investor/account email: Microsoft, United States, with international infrastructure and support operations under the tenant’s applicable arrangements. This notice does not assert a verified tenant-specific storage region. <a href="https://www.microsoft.com/licensing/docs/view/Microsoft-Products-and-Services-Data-Protection-Addendum-DPA">Data processing terms</a>.</p>
+      <h3>Scope and changes</h3><p>Only information needed for the selected service is shared with its provider. Public source websites and media destinations are independent services. Ask <a href="mailto:support@astra-via.com">support@astra-via.com</a> for the transfer inventory and contractual terms applicable to your deployment before submitting data subject to a location restriction. Historical audit records may identify providers used previously; this list describes current processing.</p>
+    </article>
+    <article id="hebrew" lang="he" dir="rtl"><h2>עברית</h2>
+      <h3>Google Cloud</h3><p>אירוח, מקורות ודוחות פרטיים, מסדי נתונים תפעוליים, גיבויים ולוגי אבטחה: ישראל (me-west1). עיבוד טקסט מסמכים בבינה מלאכותית: נקודת עיבוד באיחוד האירופי של Vertex AI. צומת IPFS הציבורי וגיבוייו: ארצות הברית; פרסום ציבורי אופציונלי עשוי להשתכפל בעולם. Google היא ספקית שמרכזה בארצות הברית, ופעילות התמיכה והשירות עשויה לכלול מיקומים נוספים. <a href="https://cloud.google.com/terms/data-processing-addendum">תנאי עיבוד מידע</a>.</p>
+      <h3>Supabase</h3><p>אימות, הרשאות חשבון ורישומי יישומים ומשקיעים: אירוח בלונדון, בריטניה (eu-west-2). Supabase היא ספקית שמרכזה בסינגפור ופעילות השירות שלה בין-לאומית. <a href="https://supabase.com/legal/dpa">תנאי עיבוד מידע</a>.</p>
+      <h3>Microsoft 365</h3><p>תכתובות עסקיות, תמיכה והודעות חשבון ומשקיעים: Microsoft, ארצות הברית, עם תשתית ותמיכה בין-לאומיות לפי הסדרי הסביבה הארגונית. אין כאן הצהרה על אזור אחסון מסוים שאומת לסביבה זו. <a href="https://www.microsoft.com/licensing/docs/view/Microsoft-Products-and-Services-Data-Protection-Addendum-DPA">תנאי עיבוד מידע</a>.</p>
+      <h3>היקף ושינויים</h3><p>רק מידע הנדרש לשירות שנבחר נמסר לספק הרלוונטי. אתרי מקור ומדיה חיצוניים הם שירותים עצמאיים. למיפוי העברות ולתנאים החלים על סביבתכם, פנו ל-<a href="mailto:support@astra-via.com">support@astra-via.com</a> לפני מסירת מידע שמוגבל במיקום עיבוד. רישומי ביקורת היסטוריים עשויים לכלול ספקים ששימשו בעבר; הרשימה מתארת את העיבוד הנוכחי.</p>
+    </article>
+  </LegalPage>;
+}

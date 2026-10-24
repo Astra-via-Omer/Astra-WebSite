@@ -27,7 +27,7 @@ export function SiteHeader({ active }: { active?: 'journey' | 'philosophy' | 'pr
       <Link href="/what-we-can-do" aria-current={active === 'products' ? 'page' : undefined}>What we can do</Link>
       <Link href="/team" aria-current={active === 'team' ? 'page' : undefined}>Our team</Link>
       <Link href="/investors" aria-current={active === 'investors' ? 'page' : undefined}>Investor Room</Link>
-      <Link className="demo-nav" href="/demo" aria-current={active === 'demo' ? 'page' : undefined}>Try demo ↗</Link>
+      <Link className="demo-nav" href="/register">Create free account ↗</Link>
     </nav>
     <button onClick={toggle} aria-pressed={quiet}>Reduce motion <span aria-hidden="true">{quiet ? '✓' : '○'}</span></button>
   </header>;
@@ -38,7 +38,7 @@ export function SiteFooter({ floating = false }: { floating?: boolean }) {
     <nav aria-label="Information and legal">
       <Link href="/story">Reading view</Link>
       <Link href="/what-we-can-do">What we can do</Link>
-      <Link href="/privacy">Privacy & cookies</Link>
+      <Link href="/privacy">Product privacy</Link><Link href="/subprocessors">Service providers</Link>
       <Link href="/legal">Terms & disclaimer</Link>
       <Link href="/accessibility">Accessibility</Link>
     </nav>

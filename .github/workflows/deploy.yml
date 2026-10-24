@@ -54,19 +54,24 @@ jobs:
           gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
           docker build -t "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA" .
           docker push "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA"
+          DIGEST="$(gcloud artifacts docker images describe "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA" --format='value(image_summary.digest)')"
+          [[ "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "ASTRA_IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website@$DIGEST" >> "$GITHUB_ENV"
       - name: Deploy public website
         run: |
-          gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA" --service-account "$RUNTIME_ACCOUNT" --port 8080 --cpu 1 --memory 512Mi --min-instances 0 --max-instances 3 --concurrency 80 --quiet
+          gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$ASTRA_IMAGE" --service-account "$RUNTIME_ACCOUNT" --port 8080 --cpu 1 --memory 512Mi --min-instances 0 --max-instances 3 --concurrency 80 --ingress internal-and-cloud-load-balancing --quiet
       - name: Verify service
         run: |
-          URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
-          curl --fail --retry 5 --retry-delay 3 "$URL/health"
-          echo "Website: $URL" >> "$GITHUB_STEP_SUMMARY"
+          curl --fail --retry 5 --retry-delay 3 https://astra-via.com/health
+          echo "Website: https://astra-via.com" >> "$GITHUB_STEP_SUMMARY"
       - name: Deploy the matching investor service
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
           SUPABASE_ADMIN_SECRET_VERSION: ${{ vars.SUPABASE_ADMIN_SECRET_VERSION }}
+          ASTRA_INVESTOR_INTEGRITY: ${{ vars.ASTRA_INVESTOR_INTEGRITY }}
           ASTRA_INVESTOR_PASSWORD_RESET_ENABLED: ${{ vars.ASTRA_INVESTOR_PASSWORD_RESET_ENABLED }}
           ASTRA_MICROSOFT_MAIL_SECRET_VERSION: ${{ vars.ASTRA_MICROSOFT_MAIL_SECRET_VERSION }}
-        run: node scripts/deploy-investors.mjs deploy "$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/astra-website:$GITHUB_SHA"
+        run: node scripts/deploy-investors.mjs deploy "$ASTRA_IMAGE"
+      - name: Verify public website and investor assets
+        run: node scripts/check-public-assets.mjs

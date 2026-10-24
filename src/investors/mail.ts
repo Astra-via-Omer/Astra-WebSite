@@ -27,7 +27,7 @@ export async function sendRecoveryEmail(config: MailConfig, recipient: string, t
   const sent = await transport(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(config.sender)}/sendMail`, {
     method: 'POST', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(10000),
     headers: { Authorization: 'Bearer ' + access.access_token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: { subject: 'Reset your Astra-via Investor Room password', body: { contentType: 'Text', content: `A password reset was requested for your Astra-via Investor Room account.\n\nOpen this single-use link to choose a new password:\n${link}\n\nThe link expires under the account security settings. If you did not request this, ignore this message. Your password and access permissions have not changed. Never forward this link.\n\nFor help, contact support@astra-via.com.` }, toRecipients: [{ emailAddress: { address: email } }] }, saveToSentItems: true }),
+    body: JSON.stringify({ message: { subject: 'Reset your Astra-via Investor Room password', body: { contentType: 'Text', content: `A password reset was requested for your Astra-via Investor Room account.\n\nOpen this single-use link to choose a new password:\n${link}\n\nThe link expires under the account security settings. If you did not request this, ignore this message. Your password and access permissions have not changed. Never forward this link.\n\nFor help, contact support@astra-via.com.` }, toRecipients: [{ emailAddress: { address: email } }] }, saveToSentItems: false }),
   });
   // Accepted by Microsoft is distinct from confirmed inbox delivery.
   if (sent.status !== 202) throw Error('Mail provider rejected the request');

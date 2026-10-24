@@ -1,0 +1,5 @@
+Contact: mailto:support@astra-via.com
+Expires: 2027-10-24T00:00:00Z
+Preferred-Languages: en, he
+Canonical: https://astra-via.com/.well-known/security.txt
+Policy: https://astra-via.com/legal
