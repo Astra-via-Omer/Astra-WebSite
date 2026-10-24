@@ -11,6 +11,6 @@ export default function ReadingStory() {
         <img src={'/story/' + chapter.image + '.webp'} alt="" loading="lazy" />
         <div><p className="eyebrow">{String(i + 1).padStart(2, '0')} / {chapter.label}</p><h2>{chapter.title.replace('\n', ' ')}</h2><p>{chapter.copy}</p><p>{chapter.detail}</p></div>
       </section>)}
-      <aside className="notice">This website presents our approach and roadmap. Web3 provenance and decentralized storage are planned capabilities. AI-assisted assessments can be incomplete or incorrect and require human review. <a href="/legal">Read the disclaimer</a>.</aside>
+      <aside className="notice">This website presents our approach and roadmap. Blockchain attestations remain planned. The Evidence pilot supports optional public IPFS publication, which can replicate globally. AI-assisted assessments can be incomplete or incorrect and require human review. <a href="/legal">Read the disclaimer</a>.</aside>
     </main><SiteFooter /></>;
 }
