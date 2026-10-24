@@ -161,3 +161,18 @@ changes that account's shared Supabase password for its other Astra applications
 ### Test-account archival
 
 Apply `database/008_investor_directory.sql` with the Workspace directory-archive migration. Protected `app_metadata.directory_archived=true` omits archived synthetic members from normal investor administration while preserving memberships and audit identities. Keep those accounts disabled, banned, expired and unapproved. Ordinary disabled people remain visible. The fixture-creating `tests/live-investors.mjs` requires a separate staging Supabase project/service/bucket and refuses the production project. Read-only/unknown-account `tests/live-recovery.mjs` creates no accounts.
+
+### Customer-review security release (24 October 2026)
+
+Apply `database/009_investor_integrity.sql` before enabling the repository variable
+and investor runtime environment `ASTRA_INVESTOR_INTEGRITY=on`. The SQL is additive
+and compatible with the previous runtime. It freezes the current NDA as a labeled
+legacy snapshot, preserves existing acceptance evidence unchanged, and captures
+hashes for fresh acceptances. Once enforcement is on, existing investors accept
+the frozen current text once before reading documents. Future publications must
+use a new version. Do not edit or backdate prior acceptance records.
+
+The same migration deduplicates room-open events per verified session and removes
+ordinary product-admin writes to the investor approval column. Investor access
+is still individually approved; legal recipient qualification is a separate
+owner/counsel process and is not established by an approval checkbox.

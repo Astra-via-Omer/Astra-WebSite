@@ -4,14 +4,14 @@ export class RoomError extends Error {
 export const categories = ['Company overview', 'Pitch deck', 'Financials', 'Corporate & legal', 'Product & traction', 'Investor updates'] as const;
 export type Member = {
   user_id: string; email: string; role: 'investor' | 'admin'; expires_at: string | null;
-  stage: string; nda_version: string | null; organization: string; display_name?: string;
+  stage: string; nda_version: string | null; nda_sha256?: string | null; organization: string; display_name?: string;
 };
 export type RoomDocument = {
   id: string; title: string; category: string; version: string; description: string;
   object_path: string; sha256: string; pages: number; bytes: number; published: boolean; created_at: string;
 };
 export function assertMembership(user: { email_confirmed_at?: string; banned_until?: string; app_metadata?: Record<string, unknown> }, approved: boolean, member: Member | null, now = Date.now()) {
-  if (!user.email_confirmed_at || user.app_metadata?.disabled === true || user.app_metadata?.disabled === 'true' ||
+  if (!user.email_confirmed_at || user.app_metadata?.disabled === true || user.app_metadata?.disabled === 'true' || user.app_metadata?.directory_archived === true || user.app_metadata?.directory_archived === 'true' ||
       (user.banned_until && Date.parse(user.banned_until) > now) || !approved || !member ||
       (member.expires_at !== null && (!Number.isFinite(Date.parse(member.expires_at)) || Date.parse(member.expires_at) <= now))) {
     throw new RoomError(403, 'Investor room access is not approved, has expired, or has been suspended.');

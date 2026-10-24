@@ -38,7 +38,7 @@ export function SiteFooter({ floating = false }: { floating?: boolean }) {
     <nav aria-label="Information and legal">
       <Link href="/story">Reading view</Link>
       <Link href="/what-we-can-do">What we can do</Link>
-      <Link href="/privacy">Privacy & cookies</Link>
+      <Link href="/privacy">Product privacy</Link><Link href="/subprocessors">Service providers</Link>
       <Link href="/legal">Terms & disclaimer</Link>
       <Link href="/accessibility">Accessibility</Link>
     </nav>

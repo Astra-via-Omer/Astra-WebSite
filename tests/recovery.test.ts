@@ -25,7 +25,7 @@ test('recovery mail uses the existing app and sender; Graph acceptance is requir
   assert.equal(form.get('scope'), 'https://graph.microsoft.com/.default');
   assert.equal(calls[1].url, 'https://graph.microsoft.com/v1.0/users/investors%40example.invalid/sendMail');
   const body = JSON.parse(calls[1].init.body as string);
-  assert.equal(body.saveToSentItems, true);
+  assert.equal(body.saveToSentItems, false);
   assert.deepEqual(body.message.toRecipients, [{ emailAddress: { address: 'person@example.invalid' } }]);
   assert.equal(body.message.body.contentType, 'Text');
   assert.match(body.message.body.content, /https:\/\/astra-via.com\/investors#token_hash=b+&type=recovery/);
