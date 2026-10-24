@@ -1,7 +1,7 @@
 // Explicit deployment validation, never run by npm test. Uses synthetic accounts
 // and a synthetic PDF; no email is sent and no real investor files are imported.
 import assert from 'node:assert/strict';
-import { createHmac, randomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 const base = process.argv[2], url = process.env.ASTRA_TEST_SUPABASE_URL, publicKey = process.env.ASTRA_TEST_SUPABASE_ANON_KEY, adminKey = process.env.ASTRA_TEST_SUPABASE_SERVICE_ROLE_KEY, bucket = process.env.ASTRA_TEST_STORAGE_BUCKET;
@@ -12,13 +12,6 @@ const checked = r => { if (r.error) throw Error('Validation database operation f
 const original = checked(await db.from('astra_investor_settings').select('*').single());
 if (original.nda_text) throw Error('Validation requires the empty, newly provisioned room; never overwrite an active agreement.');
 const suffix = randomBytes(5).toString('hex'), users = []; let documentId;
-function totp(secret) {
-  let bits = ''; for (const c of secret.toUpperCase().replace(/=+$/, '')) bits += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.indexOf(c).toString(2).padStart(5, '0');
-  const bytes = []; for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
-  const count = Buffer.alloc(8); count.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30000)));
-  const mac = createHmac('sha1', Buffer.from(bytes)).update(count).digest(), offset = mac[19] & 15;
-  return ((mac.readUInt32BE(offset) & 0x7fffffff) % 1000000).toString().padStart(6, '0');
-}
 async function api(client, path = '', body) {
   const session = client ? (await client.auth.getSession()).data.session : null;
   return fetch(base + '/api/investors' + path, { method: body ? 'POST' : 'GET', headers: { ...(session ? { Authorization: 'Bearer ' + session.access_token } : {}), ...(body && !(body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}) }, body: body ? body instanceof FormData ? body : JSON.stringify(body) : undefined });
@@ -39,11 +32,7 @@ try {
   assert.equal((await api(null)).status, 401);
   assert.equal((await fetch(base + '/api/investors', { headers: { Authorization: 'Bearer forged.token.value' } })).status, 401);
   const admin = await person('admin', 'admin'), a = await person('a'), b = await person('b');
-  assert.equal((await api(admin.client, '?admin=1')).status, 403, 'AAL1 administrator must be blocked');
-  const enrollment = await admin.client.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Synthetic validation' });
-  if (enrollment.error) throw Error('MFA enrollment validation failed: ' + enrollment.error.code);
-  const verified = await admin.client.auth.mfa.challengeAndVerify({ factorId: enrollment.data.id, code: totp(enrollment.data.totp.secret) });
-  if (verified.error) throw Error('MFA verification validation failed: ' + verified.error.code);
+  assert.equal((await api(admin.client, '?admin=1')).status, 200, 'An approved administrator can sign in with a password');
   assert.equal((await json(admin.client, undefined, '?admin=1')).members.some(member => member.user_id === admin.id), true, 'Staging administrator can manage the fixture members');
   assert.equal((await api(a.client, '', { action: 'save-nda', text: 'Forged' })).status, 403);
   const nda = await json(admin.client, { action: 'save-nda', text: 'SYNTHETIC VALIDATION ONLY. This temporary text tests acceptance versioning; it is not an investor agreement.' });
@@ -89,7 +78,7 @@ try {
   assert.equal((await api(a.client)).status, 403, 'Existing token loses revoked access');
   const events = checked(await db.from('astra_investor_events').select('*').eq('document_id', documentId).eq('action', 'document_delivered'));
   assert.ok(events.length >= 4); assert.ok(events.every(e => e.copy_id && e.details.delivered_sha256));
-  console.log('Passed live: authentication, MFA, NDA versioning, uploads, private bucket, draft isolation, per-investor access, preview/download separation, personalized copies, sharing approval, private Q&A, audit hashes, expiry and immediate revocation.');
+  console.log('Passed live: password authentication, NDA versioning, uploads, private bucket, draft isolation, per-investor access, preview/download separation, personalized copies, sharing approval, private Q&A, audit hashes, expiry and immediate revocation.');
 } finally {
   checked(await db.from('astra_investor_settings').update({ nda_text: original.nda_text, nda_version: original.nda_version, updated_at: original.updated_at }).eq('id', true));
   if (documentId) checked(await db.from('astra_investor_documents').update({ published: false }).eq('id', documentId));

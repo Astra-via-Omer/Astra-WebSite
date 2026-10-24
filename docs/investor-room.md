@@ -18,8 +18,8 @@ BEFORE trigger rebuilds the other application approvals.
 row supplies the separate room role and optional expiry. Every API request
 verifies the bearer token through Supabase, reads the current Auth account,
 membership, and approval, and rejects suspended or expired accounts. Watermarks
-use the fresh verified Auth email. Administrative actions require `aal2` from a
-verified token; the UI supports authenticator enrollment and verification.
+use the fresh verified Auth email. Approved administrators sign in with their shared
+account email and password, without an OTP or phone challenge.
 
 The first administrator must be an existing verified Astra owner account. Create
 its member row with role `admin`, then enable its investor approval through a
@@ -55,7 +55,7 @@ needed for the new presentation. Names and private views clear on sign-out or
 access loss. Administrator MFA remains required for management actions; its
 verification form is now in an expandable panel.
 
-1. Sign in at `/investors` and complete authenticator verification as an admin.
+1. Sign in at `/investors` with your administrator email and password.
 2. Open **Manage room → Confidentiality** and publish your approved agreement.
    No agreement is invented or accepted on your behalf. Investor document access
    remains blocked until the current agreement has been accepted.
@@ -155,7 +155,7 @@ request source. Provider acceptance is recorded separately from confirmed inbox
 delivery. Tokens and credentials never enter application logs or audit records.
 The email uses a fixed HTTPS investor URL and a single-use token in the fragment,
 removed before Supabase verification. The recovery screen opens the password form;
-Supabase MFA and all live investor permissions still apply. Changing a password
+All live investor permissions still apply. Changing a password
 changes that account's shared Supabase password for its other Astra applications.
 
 ### Test-account archival
@@ -176,3 +176,6 @@ The same migration deduplicates room-open events per verified session and remove
 ordinary product-admin writes to the investor approval column. Investor access
 is still individually approved; legal recipient qualification is a separate
 owner/counsel process and is not established by an approval checkbox.
+
+
+Preview sign-in accepts the existing account email and password for every approved role. No authenticator enrollment, OTP or phone challenge is required. Current account, role, approval, membership, NDA integrity and document grants remain enforced. Complete the shared Workspace migration and old-factor cleanup when deploying.

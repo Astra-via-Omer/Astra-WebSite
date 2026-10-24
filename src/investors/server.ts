@@ -19,7 +19,7 @@ function database() {
   if (!publicConfig().enabled) throw new RoomError(503, 'The investor room is being prepared. Please contact support@astra-via.com.');
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
 }
-type Context = { db: SupabaseClient; member: Member; token: string; mfa: boolean; sessionId: string; request: Request };
+type Context = { db: SupabaseClient; member: Member; token: string; sessionId: string; request: Request };
 export function checked<T>(result: { data: T; error: unknown }): T {
   if (result.error) { console.error('Investor database operation failed'); throw new RoomError(503, 'The operation could not be confirmed. Refresh and try again.'); }
   return result.data;
@@ -51,7 +51,7 @@ export async function context(request: Request): Promise<Context> {
   member.display_name = investorDisplayName(member.email, current.data.user.user_metadata);
   const claims = await db.auth.getClaims(token);
   if (claims.error || !claims.data) throw new RoomError(401, 'The session could not be verified.');
-  return { db, member, token, mfa: claims.data.claims.aal === 'aal2', sessionId: String(claims.data.claims.session_id || createHash('sha256').update(token).digest('hex')), request };
+  return { db, member, token, sessionId: String(claims.data.claims.session_id || createHash('sha256').update(token).digest('hex')), request };
 }
 export async function requestPasswordReset(request: Request) {
   assertOrigin(request, true);
@@ -89,7 +89,6 @@ export async function requestPasswordReset(request: Request) {
 }
 function administrator(ctx: Context) {
   if (ctx.member.role !== 'admin') throw new RoomError(403, 'Investor administrator access is required.');
-  if (!ctx.mfa) throw new RoomError(403, 'Verify with your authenticator to manage the investor room.');
 }
 async function settings(ctx: Context) {
   const row = checked(await ctx.db.from(tables.settings).select('*').eq('id', true).single());
@@ -108,8 +107,8 @@ async function directoryMembers(ctx: Context) {
 }
 export async function roomState(ctx: Context) {
   const room = await settings(ctx);
-  const canRead = ctx.member.role === 'admin' ? ctx.mfa : (!!room.nda_text && !!room.nda_version && ctx.member.nda_version === room.nda_version && (!integrityReady() || (!!room.nda_sha256 && ctx.member.nda_sha256 === room.nda_sha256)));
-  const admin = ctx.member.role === 'admin' && ctx.mfa;
+  const canRead = ctx.member.role === 'admin' ? true : (!!room.nda_text && !!room.nda_version && ctx.member.nda_version === room.nda_version && (!integrityReady() || (!!room.nda_sha256 && ctx.member.nda_sha256 === room.nda_sha256)));
+  const admin = ctx.member.role === 'admin';
   let docs: Record<string, unknown>[] = [];
   if (canRead) {
     if (admin) docs = checked(await ctx.db.from(tables.documents).select('id,title,category,version,description,pages,bytes,published,created_at').order('created_at', { ascending: false })) || [];
@@ -124,7 +123,7 @@ export async function roomState(ctx: Context) {
   const questions = canRead ? checked(await (admin ? ctx.db.from(tables.questions).select('*').in('user_id', (await directoryMembers(ctx)).map(m => m.user_id)) : ctx.db.from(tables.questions).select('*').eq('user_id', ctx.member.user_id)).order('created_at', { ascending: false }).limit(100)) : [];
   if (integrityReady()) checked(await ctx.db.rpc('astra_investor_record_room_open', { p_user_id: ctx.member.user_id, p_email: ctx.member.email, p_session_hash: createHash('sha256').update(ctx.sessionId).digest('hex') }));
   else await audit(ctx, 'room_opened');
-  return { member: ctx.member, admin, needsMfa: ctx.member.role === 'admin' && !ctx.mfa, nda: room, canRead, documents: docs, questions, categories };
+  return { member: ctx.member, admin, nda: room, canRead, documents: docs, questions, categories };
 }
 export async function adminState(ctx: Context, offset: number) {
   administrator(ctx);

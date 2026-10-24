@@ -93,4 +93,7 @@ The `/what-we-can-do` page presents the product collection with descriptions, pr
 
 ## Investor Room
 
-The Investor Room tab opens the private investor portal at `/investors`, served by an isolated Cloud Run runtime. Supabase controls individual membership and system approval; documents live in a dedicated private Google Cloud Storage bucket. Administrator MFA, versioned confidentiality acceptance, per-investor PDF preview/download grants, server-generated email/time/copy-ID watermarks, private Q&A, approved colleague access and append-only application audit are included. See [operation and deployment details](docs/investor-room.md). No real investor files or confidentiality agreement are published automatically.
+The Investor Room tab opens the private investor portal at `/investors`, served by an isolated Cloud Run runtime. Supabase controls individual membership and system approval; documents live in a dedicated private Google Cloud Storage bucket. Email/password sign-in for every role, versioned confidentiality acceptance, per-investor PDF preview/download grants, server-generated email/time/copy-ID watermarks, private Q&A, approved colleague access and append-only application audit are included. See [operation and deployment details](docs/investor-room.md). No real investor files or confidentiality agreement are published automatically.
+
+
+Preview sign-in accepts the existing account email and password for every approved role. No authenticator enrollment, OTP or phone challenge is required. Current account, role, approval, membership, NDA integrity and document grants remain enforced. Complete the shared Workspace migration and old-factor cleanup when deploying.
