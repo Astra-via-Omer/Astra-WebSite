@@ -61,6 +61,11 @@ verification form is now in an expandable panel.
    remains blocked until the current agreement has been accepted.
 3. Upload approved PDFs under **Documents**. Uploads are drafts. Publish them,
    then assign preview/download grants to individual investors in **Permissions**.
+   In **Publication**, hover over or focus a document title to preview its first
+   PDF page. Select the title or **Open full preview** for the larger viewer;
+   tapping the title also works on touch screens. Drafts can be previewed by room
+   administrators. Previews use the existing personalized, audited PDF delivery
+   and do not publish the document or change investor grants.
 4. Add investors under **Investors**. A new account gets a single-use invitation
    link to copy and share privately. Creating the link does not send email.
    The link carries the hashed verification token in a fragment; the browser
