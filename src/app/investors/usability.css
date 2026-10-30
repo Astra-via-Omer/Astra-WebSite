@@ -1,0 +1,185 @@
+/* Keep the observatory palette, with room controls sized for reading and touch. */
+.investor-page { --ir-header-height: 80px; font-size: 16px; }
+.investor-page main { max-width: 1400px; padding: 32px 48px 0; }
+.ir-room-header { position: sticky; top: 0; z-index: 70; display: flex; align-items: center; gap: 24px; min-height: var(--ir-header-height); padding: 14px max(24px, calc((100vw - 1304px) / 2)); border-bottom: 1px solid var(--ir-line); background: #071321f7; }
+.ir-room-header img { display: block; }
+.ir-room-header > span { font-size: 18px; border-left: 1px solid var(--ir-line); padding-left: 24px; }
+.ir-room-header nav { display: flex; align-items: center; gap: 24px; margin-left: auto; }
+.ir-room-header a { display: inline-flex; align-items: center; min-height: 48px; font-size: 15px; }
+.ir-room-header nav a:last-child { color: var(--ir-accent); }
+.investor-page button { min-height: 48px; font-size: 15px; padding: 12px 18px; }
+.investor-page label { font-size: 15px; gap: 8px; }
+.investor-page input, .investor-page select, .investor-page textarea { font-size: 16px; padding: 12px 14px; min-height: 48px; }
+.investor-page :is(.ir-code-label, .eyebrow) { font-size: 11px; letter-spacing: 1.1px; }
+.investor-page .ir-small, .investor-page summary, .investor-page .ir-notice { font-size: 15px; }
+.investor-page .ir-panel p, .investor-page .ir-conversation > p, .investor-page .ir-method-panel p:not(.ir-code-label), .investor-page .ir-hero-description { font-size: 17px; line-height: 1.8; }
+.investor-page .ir-panel > p { max-width: 80ch; }
+.investor-page .ir-panel h2 { font-size: 32px; margin-top: 0; }
+.investor-page .ir-panel h3 { font-size: 23px; }
+.ir-panel { padding: 32px; }
+.ir-nda-text { font-size: 17px; max-height: min(55vh, 600px); }
+.ir-check input { width: 22px; height: 22px; min-height: 22px; padding: 0; }
+.ir-observatory { min-height: 310px; padding: 16px 0 32px; }
+.ir-gravity { max-width: 430px; justify-self: end; margin-top: 0; }
+.ir-hero-copy h1 { font-size: clamp(44px, 4.8vw, 66px); }
+.ir-text-link { font-size: 16px; min-height: 48px; }
+.ir-principle-line { font-size: 11px; padding: 18px 0; }
+.ir-login-grid { padding-top: 40px; gap: 64px; }
+.investor-page .ir-login { padding: 32px 32px 0; }
+.investor-page .ir-login > p:not(.ir-code-label), .ir-entry-introduction > p:not(.ir-code-label), .ir-entry-steps p { font-size: 16px; }
+.ir-entry-steps strong { font-size: 18px; }
+.investor-page .ir-login-note { font-size: 14px !important; }
+.ir-login-footer { font-size: 10px; }
+.ir-return-welcome { padding: 12px 0 24px; }
+.ir-return-welcome .ir-code-label { margin: 0 0 12px; }
+.ir-return-welcome h1 { overflow-wrap: anywhere; font-size: clamp(32px, 3.4vw, 46px); font-weight: 400; line-height: 1.2; letter-spacing: -1.5px; margin: 0 0 12px; }
+.ir-return-welcome > p:last-child { font-size: 17px; margin: 0; }
+.ir-identity-bar { padding: 20px 0; border-top: 1px solid var(--ir-line); }
+.ir-identity-person strong { font-size: 17px; }
+.ir-identity-person div > span { font-size: 14px; }
+.ir-avatar { width: 48px; height: 48px; flex-basis: 48px; font-size: 15px; }
+.ir-recognized { font-size: 10px; }
+.ir-room-navigation { position: sticky; top: var(--ir-header-height); z-index: 55; background: #071321f7; border-block: 1px solid var(--ir-line); margin-bottom: 32px; scroll-margin-top: var(--ir-header-height); }
+.ir-room-navigation .ir-tabs { margin: 0; gap: 6px; border: 0; flex-wrap: wrap; }
+.investor-page .ir-room-navigation .ir-tabs button { font-size: 16px; min-height: 56px; padding: 16px 20px; }
+.investor-page .ir-room-navigation .ir-tabs button[aria-current] { color: var(--ir-accent); background: #2be8f508; }
+.investor-page .ir-mobile-navigation { display: none; }
+.ir-quick-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
+.ir-material-count > span { font-size: 12px; }
+.ir-section-title h2, .ir-library-heading h2 { font-size: 36px; }
+.ir-briefing-content > p:not(.ir-code-label), .ir-signature-card > p, .ir-dispatch-grid article > p, .ir-dispatch-empty p { font-size: 16px; }
+.ir-card-bottom, .ir-signature-rule, .ir-card-top { font-size: 12px; }
+.investor-page .ir-text-button { font-size: 16px; }
+.ir-documents { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.ir-document h3 { overflow-wrap: anywhere; font-size: 27px; line-height: 1.35; }
+.ir-document p { font-size: 16px; line-height: 1.8; }
+.ir-document-version, .ir-document small { font-size: 14px; }
+.ir-doc-top .ir-code-label { font-size: 12px; }
+.ir-doc-actions { gap: 12px; }
+.ir-library-heading { display: block; margin-bottom: 24px; }
+.ir-library-heading p { font-size: 17px; }
+.ir-library-controls { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr); gap: 20px; align-items: flex-end; margin: 24px 0 16px; }
+.ir-library-results { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.ir-library-count { font-size: 15px; margin: 0; }
+.ir-list-row { font-size: 16px; gap: 20px; padding: 20px 0; }
+.ir-subtabs { gap: 10px; margin-bottom: 28px; }
+.investor-page .ir-subtabs button { font-size: 15px; }
+.investor-page table, .investor-page td summary { font-size: 15px; }
+.ir-publication-title > span:first-child { font-size: 16px; }
+.ir-publication-preview { z-index: 85; }
+.ir-preview-label { font-size: 14px; }
+.ir-publication-preview-header h3 { font-size: 17px !important; }
+.ir-about-astra { margin: 48px 0 24px; border-top: 1px solid var(--ir-line); }
+.investor-page .ir-about-astra > summary { padding: 24px 0; font-size: 17px; color: var(--ir-accent); }
+.ir-about-astra .ir-method { margin-top: 0; }
+.ir-confidential { font-size: 13px; }
+
+/* The document reader fits the page to the screen and supports touch zoom/scroll. */
+.investor-page .ir-reader { inset: 12px; padding: 0; z-index: 100; }
+.ir-reader .ir-modal-header { padding: 18px 24px; flex-shrink: 0; border-bottom: 1px solid var(--ir-line); }
+.ir-reader .ir-modal-header > div { min-width: 0; }
+.ir-reader .ir-modal-header h2 { font-size: 22px; overflow-wrap: anywhere; margin-top: 4px; }
+.ir-reader .ir-modal-header button { flex-shrink: 0; }
+.ir-reader-controls { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 14px 24px; border-bottom: 1px solid var(--ir-line); }
+.ir-reader-pages { display: flex; align-items: flex-end; gap: 12px; }
+.investor-page .ir-reader-controls label { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.ir-reader-controls select { width: auto; min-width: 110px; }
+.ir-reader-viewport { position: relative; flex: 1; min-height: 0; overflow: auto; background: #243441; overscroll-behavior: contain; }
+.ir-reader-page { min-width: 100%; width: max-content; padding: 16px; }
+.ir-reader-page canvas { display: block; margin: 0 auto; background: white; box-shadow: 0 4px 24px #0006; }
+.ir-reader-text { max-width: 800px; margin: 24px auto; padding: 32px; color: #142332; background: #f6f8fa; }
+.ir-reader-text h3 { font-size: 22px; font-weight: 500; }
+.investor-page .ir-reader-text p { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 19px; line-height: 1.9; color: #142332; }
+.ir-reader-status { position: absolute; top: 36px; left: 16px; right: 16px; text-align: center; font-size: 17px; }
+.ir-reader-status p { color: var(--ir-paper); }
+.investor-page p.ir-reader-footer { font-size: 14px; margin: 0; padding: 10px 24px; border-top: 1px solid var(--ir-line); flex-shrink: 0; }
+
+@media (max-width: 800px) {
+  .investor-page main { padding-inline: 24px; }
+  .ir-documents, .ir-overview-grid { grid-template-columns: minmax(0, 1fr); }
+  .ir-room-header { gap: 16px; padding-inline: 24px; }
+  .ir-room-header > span { padding-left: 16px; }
+  .ir-login-grid { gap: 32px; }
+  .ir-room-navigation .ir-tabs { display: none; }
+  .investor-page .ir-mobile-navigation { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 16px; padding: 12px 0; }
+  .ir-mobile-navigation select { min-height: 52px; }
+}
+@media (max-width: 650px) {
+  .investor-page { --ir-header-height: 72px; }
+  .investor-page main { padding: 20px 16px 0; }
+  .ir-room-header { padding: 10px 16px; gap: 12px; }
+  .ir-room-header img { width: 120px; height: auto; }
+  .ir-room-header > span { display: none; }
+  .ir-room-header nav { gap: 14px; }
+  .ir-room-header a { font-size: 14px; }
+  .ir-room-coordinate { font-size: 10px; padding: 0 0 16px; }
+  .ir-observatory { display: block; min-height: 0; padding: 8px 0 24px; }
+  .ir-observatory .ir-gravity, .ir-principle-line { display: none; }
+  .ir-hero-copy h1 { font-size: 40px; letter-spacing: -1.5px; margin-bottom: 16px; }
+  .investor-page .ir-hero-copy .ir-hero-description { font-size: 16px; }
+  .ir-hero-copy > .ir-code-label { font-size: 11px; margin-bottom: 16px; }
+  .ir-login-grid { display: flex; flex-direction: column; gap: 32px; padding-top: 12px; }
+  .ir-login-grid > .ir-login { order: -1; width: 100%; }
+  .investor-page .ir-login { padding: 24px 20px 0; }
+  .ir-entry-introduction h2 { font-size: 30px; }
+  .ir-login h2 { font-size: 32px; }
+  .ir-panel { padding: 24px 20px; }
+  .ir-return-welcome { padding: 4px 0 20px; }
+  .ir-return-welcome h1 { font-size: 32px; letter-spacing: -1px; }
+  .ir-return-welcome > p:last-child { font-size: 16px; }
+  .ir-identity-bar { gap: 16px; padding: 16px 0; }
+  .ir-identity-actions { justify-content: flex-end; }
+  .ir-recognized { margin-right: auto; font-size: 10px; }
+  .ir-identity-actions button { font-size: 15px; }
+  .ir-room-navigation { margin-bottom: 24px; }
+  .ir-quick-actions { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
+  .ir-section-title { display: block; }
+  .ir-section-title h2, .ir-library-heading h2 { font-size: 30px; }
+  .ir-material-count { padding-top: 12px; font-size: 24px; gap: 12px; align-items: center; }
+  .ir-material-count > span { max-width: none; font-size: 12px; }
+  .ir-library-controls { grid-template-columns: 1fr; gap: 16px; }
+  .ir-document { padding: 24px 20px; }
+  .ir-document h3 { font-size: 25px; }
+  .ir-doc-actions { display: grid; grid-template-columns: 1fr; }
+  .ir-signature-card > .ir-fingerprint { display: none; }
+  .ir-signature-card h3 { margin-top: 24px; }
+  .ir-subtabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 12px; }
+  .ir-subtabs button { flex-shrink: 0; white-space: nowrap; }
+  .ir-list-row { gap: 12px; }
+  .ir-publication-target { flex-basis: 100%; }
+  .ir-reader .ir-modal-header { padding: 12px 16px; align-items: center; gap: 12px; }
+  .ir-reader .ir-modal-header h2 { font-size: 17px; line-height: 1.4; }
+  .ir-reader .ir-modal-header .ir-code-label { display: none; }
+  .investor-page .ir-reader { inset: 0; border: 0; height: 100dvh; }
+  .ir-reader-controls { padding: 10px 12px; gap: 10px; }
+  .ir-reader-pages { width: 100%; justify-content: space-between; gap: 8px; }
+  .investor-page .ir-reader-pages button { padding: 10px; font-size: 14px; }
+  .investor-page .ir-reader-pages label { gap: 6px; }
+  .ir-reader-controls select { min-width: 80px; }
+  .ir-reader-zoom { margin-left: auto; }
+  .ir-reader-text { margin: 16px; padding: 24px 20px; }
+  .investor-page p.ir-reader-footer { font-size: 12px; padding: 8px 16px max(8px, env(safe-area-inset-bottom)); }
+}
+@media print { .ir-room-header, .ir-room-navigation, .ir-quick-actions { display: none; } }
+
+/* Keep the first document within reach on smaller screens. */
+.investor-page .ir-category-toggle { display: none; }
+@media (max-width: 650px) {
+  .ir-return-welcome > p:last-child { display: none; }
+  .ir-return-welcome h1 { font-size: 28px; }
+  .ir-identity-bar { flex-direction: row; align-items: center; gap: 12px; }
+  .ir-identity-person { flex: 1; min-width: 0; gap: 10px; }
+  .ir-identity-person > div { min-width: 0; }
+  .ir-identity-person div > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ir-recognized { display: none; }
+  .ir-identity-actions { flex-shrink: 0; }
+  .ir-identity-actions .ir-signout { padding-inline: 8px; }
+  .ir-library-controls { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+  .investor-page .ir-category-toggle { display: block; align-self: end; }
+  .ir-category-control { grid-column: 1 / -1; }
+  .ir-library-controls[data-filters-open=false] .ir-category-control { display: none; }
+  .investor-page:not(.ir-room-active) main { display: flex; flex-direction: column; }
+  .investor-page:not(.ir-room-active) .ir-login-grid { order: -1; padding-top: 0; }
+  .investor-page:not(.ir-room-active) .ir-notice { order: -2; }
+  .investor-page:not(.ir-room-active) .ir-room-coordinate { margin-top: 32px; }
+}

@@ -50,6 +50,7 @@ export function Fingerprint({ small = false }: { small?: boolean }) {
 
 export function RoomWelcome({ member, signedIn }: { member?: InvestorPerson; signedIn: boolean }) {
   const name = member?.display_name || member?.email.split('@')[0];
+  if (signedIn) return <section className="ir-return-welcome" aria-labelledby="ir-welcome-title"><p className="ir-code-label">ASTRA-VIA / INVESTOR ROOM</p><h1 id="ir-welcome-title">{name ? <>Welcome back, <em>{name}.</em></> : 'Your investor room.'}</h1><p>Your documents, company updates, and a direct line to the Astra team.</p></section>;
   return <>
     <div className="ir-room-coordinate"><span><i /> ASTRA-VIA <b>/</b> INVESTOR RELATIONS</span><span>{member ? 'YOUR PRIVATE ORBIT' : 'A CLOSER PERSPECTIVE'} <b aria-hidden="true">↗</b></span></div>
     <section className="ir-observatory" aria-labelledby="ir-welcome-title">

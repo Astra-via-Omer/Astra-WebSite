@@ -33,12 +33,25 @@ change the schema; this is not an externally immutable compliance archive.
 
 ## Using the room
 
-The room opens with the Astra observatory: a gravity-well illustration, a personal
+The room uses larger reading text and touch controls on the same `/investors`
+address for desktop and mobile. Signed-in members get a compact welcome and
+persistent section navigation; on phones, **Go to** selects the section. The
+overview links directly to documents and questions. The Astra background material
+is available in an expandable section below the signed-in room.
+
+**Documents** supports title/description search, category filtering and clearing
+filters. The document reader provides page navigation, fit-to-width and zoom,
+plus a **Text view** that reflows the current page's existing PDF text for smaller
+screens and assistive readers. Image-only PDF content remains available in page
+view; text view does not perform OCR. The reader continues to use personalized
+copies from the existing authenticated delivery endpoint.
+
+Before sign-in, the desktop room opens with the Astra observatory: a gravity-well illustration, a personal
 welcome, and chapters about connections, traceability and the philosophy already
 published on the Astra website. The fingerprint is a visual metaphor; the page
 does not collect biometric information.
 
-After sign-in, **Your space** shows the investor's available published materials,
+After sign-in, **Overview** shows the investor's available published materials,
 their personal signature card, and **The Astra Dispatch**. Dispatch entries are
 published PDFs in the existing **Investor updates** category. They appear only
 after the investor also has the required document grant and current agreement.
