@@ -2,8 +2,10 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { SiteHeader, SiteFooter } from './SiteChrome';
+import { SiteFooter } from './SiteChrome';
 import InvestorPublicationList from './InvestorPublicationList';
+import InvestorRoomNavigation, { InvestorRoomHeader } from './InvestorRoomNavigation';
+import InvestorDocumentViewer from './InvestorDocumentViewer';
 import { AstraMethod, InvestorDispatch, InvestorIdentity, InvestorOverview, LoginIntroduction, RoomWelcome, type InvestorDocument, type InvestorPerson } from './InvestorExperience';
 
 type Doc = InvestorDocument;
@@ -24,6 +26,7 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
   const [preview, setPreview] = useState<{ url: string; title: string } | null>(null), [shareDoc, setShareDoc] = useState<Doc | null>(null);
   const [recovering, setRecovering] = useState(false);
   const [invitation, setInvitation] = useState(''); const generation = useRef(0); const previewUrl = useRef('');
+  const dialogFocus = useRef<HTMLElement | null>(null);
   const closePreview = useCallback(() => { if (previewUrl.current) URL.revokeObjectURL(previewUrl.current); previewUrl.current = ''; setPreview(null); }, []);
   const clearPrivate = useCallback(() => { generation.current++; setState(null); setAdmin(null); setInvitation(''); setShareDoc(null); setTab('overview'); closePreview(); }, [closePreview]);
   const request = useCallback(async (url: string, options?: RequestInit) => {
@@ -96,6 +99,7 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
     try { await run({ action, ...Object.fromEntries(new FormData(form)) }); form.reset(); if (action === 'share') setShareDoc(null); } catch {}
   }
   async function openDocument(doc: Doc, download: boolean) {
+    if (!download) dialogFocus.current = document.activeElement as HTMLElement | null;
     setBusy(true); setError(''); const current = generation.current;
     try {
       const response = await request(`/api/investors/document/${doc.id}${download ? '?download=1' : ''}`);
@@ -109,23 +113,29 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
   }
   useEffect(() => {
     if (!preview && !shareDoc) return;
-    const previous = document.activeElement as HTMLElement | null;
+    const previous = dialogFocus.current || document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
     const keyboard = (event: KeyboardEvent) => {
       if (event.key === 'Escape') { closePreview(); setShareDoc(null); }
       if (event.key !== 'Tab') return;
       const dialog = document.querySelector<HTMLElement>('.ir-modal');
-      const controls = dialog?.querySelectorAll<HTMLElement>('button,input,textarea,select,a[href],iframe');
+      const controls = dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),a[href],[tabindex="0"]');
       if (!controls?.length) return;
       const first = controls[0], last = controls[controls.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
     document.addEventListener('keydown', keyboard);
-    return () => { document.removeEventListener('keydown', keyboard); previous?.focus(); };
+    return () => { document.removeEventListener('keydown', keyboard); document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus(); };
   }, [preview, shareDoc, closePreview]);
+  function selectTab(next: string) {
+    setTab(next);
+    if (next === 'admin') refresh(true).catch(e => setError(e.message));
+    requestAnimationFrame(() => document.getElementById('ir-sections')?.scrollIntoView({ block: 'start' }));
+  }
   async function signOut() { clearPrivate(); setError(''); setMessage(''); await auth!.auth.signOut({ scope: 'local' }); }
-  return <div className="investor-page">
-    <a className="skip" href="#investor-main">Skip to investor room</a><SiteHeader active="investors" />
+  return <div className={`investor-page${signedIn ? ' ir-room-active' : ''}`}>
+    <a className="skip" href="#investor-main">Skip to investor room</a><InvestorRoomHeader />
     <main id="investor-main" tabIndex={-1}>
       <RoomWelcome member={state?.member} signedIn={signedIn} />
       {error && <div className="ir-notice ir-error" role="alert">{error}</div>}{message && <div className="ir-notice" role="status">{message}</div>}
@@ -133,17 +143,17 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
         <LoginIntroduction />
         <Login auth={auth!} onError={setError} passwordReset={config.passwordReset} />
       </div> : <>
-        <InvestorIdentity member={state?.member} onAccount={state?.canRead ? () => setTab('account') : undefined} onSignOut={signOut} />
+        <InvestorIdentity member={state?.member} onAccount={state?.canRead ? () => selectTab('account') : undefined} onSignOut={signOut} />
         {recovering && <section className="ir-panel"><h2>Choose a new password</h2><p>Your investor permissions remain subject to approval.</p><SetPassword auth={auth!} initiallyOpen onSaved={() => { setRecovering(false); setMessage('Password updated.'); }} /></section>}
         {!recovering && state && !state.canRead && <section className="ir-panel"><SetPassword auth={auth!} /></section>}
         {!state ? <section className="ir-panel"><h2>Checking your access</h2><p>Access requires an active invitation and approval. If you need help, contact support@astra-via.com.</p></section> : <>
           {!recovering && !state.canRead && <section className="ir-panel ir-agreement"><p className="eyebrow">BEFORE YOU ENTER</p><h2>Confidentiality agreement</h2>{state.nda.nda_text ? <><div className="ir-nda-text">{state.nda.nda_text}</div><p className="ir-small">Version {state.nda.nda_version}</p><form onSubmit={event => { event.preventDefault(); void run({ action: 'accept-nda', version: state.nda.nda_version }).catch(() => {}); }}><label className="ir-check"><input type="checkbox" required /> I have read and accept this confidentiality agreement.</label><button className="ir-primary" disabled={busy}>Accept and enter</button></form></> : <p>The administrator is preparing the confidentiality agreement. Documents will be available after it is published and accepted.</p>}</section>}
           {!recovering && state.canRead && <>
-            <nav className="ir-tabs" aria-label="Investor room sections">{[['overview', 'Your space'], ['documents', 'Documents'], ['updates', 'Astra updates'], ['questions', 'Conversation'], ['account', 'Your account'], ...(state.admin ? [['admin', 'Manage room']] : [])].map(([key, label], i) => <button key={key} aria-current={tab === key ? 'page' : undefined} onClick={() => { setTab(key); if (key === 'admin') refresh(true).catch(e => setError(e.message)); }}><span className="ir-tab-number" aria-hidden="true">0{i + 1}</span>{label}</button>)}</nav>
+            <InvestorRoomNavigation selected={tab} admin={state.admin} onSelect={selectTab} />
             <div className="ir-tab-content" key={tab}>
-            {tab === 'overview' && <InvestorOverview member={state.member} documents={state.documents.filter(d => d.published)} onTab={setTab} onOpen={doc => void openDocument(doc, false)} />}
+            {tab === 'overview' && <><div className="ir-quick-actions"><button className="ir-primary" onClick={() => selectTab('documents')}>Browse documents <span aria-hidden="true">↗</span></button><button onClick={() => selectTab('questions')}>Ask the Astra team</button></div><InvestorOverview member={state.member} documents={state.documents.filter(d => d.published)} onTab={selectTab} onOpen={doc => void openDocument(doc, false)} /></>}
             {tab === 'updates' && <InvestorDispatch documents={state.documents.filter(d => d.published)} onOpen={doc => void openDocument(doc, false)} />}
-            {tab === 'documents' && <DocumentLibrary state={state} busy={busy} onOpen={openDocument} onShare={setShareDoc} />}
+            {tab === 'documents' && <DocumentLibrary state={state} busy={busy} onOpen={openDocument} onShare={doc => { dialogFocus.current = document.activeElement as HTMLElement | null; setShareDoc(doc); }} />}
             {tab === 'questions' && <section className="ir-panel ir-conversation"><p className="ir-code-label">04 / AN OPEN CONVERSATION</p><h2>What’s on <em>your mind?</em></h2><p>A good question can open an entirely new perspective. Your conversation is private between you and the Astra investor team.</p><form onSubmit={e => void submit(e, 'question')}><label>Your question<textarea name="question" placeholder="What would you like to explore?" required maxLength={4000} rows={4} /></label><button className="ir-primary" disabled={busy}>Send your question <span aria-hidden="true">↗</span></button></form><Questions questions={state.questions} /></section>}
             {tab === 'account' && <section className="ir-panel"><p className="ir-code-label">05 / YOUR PERSONAL CONNECTION</p><h2>Your account. <em>Your space.</em></h2><ProfileName auth={auth!} name={state.member.display_name || ''} onSaved={() => void refresh().catch(e => setError(e.message))} /><h3>Access & privacy</h3><p>Signed in as <strong>{state.member.email}</strong>. {state.member.expires_at ? `Access expires ${date(state.member.expires_at)}.` : 'Access remains subject to administrator approval.'}</p><p>We record account identity, access requests, document delivery, copy IDs, confidentiality acceptance, questions, sharing requests, and permission changes to manage investor relations and protect confidential materials. Investor room administrators can inspect these records.</p><p>Documents are stored privately on Google Cloud. Supabase handles accounts, permissions and investor records. Your email and the delivery timestamp appear in your personalized document copies. A delivery event means the server issued a copy; it does not prove that a person read or saved it.</p><p>Colleague access requests require approval and a separate account. External forwarding, screenshots and copies outside this portal cannot be reliably tracked or prevented. Revoking portal access does not recall downloaded files.</p><p>Investor records are retained while needed for investor relations, security and applicable business obligations. Contact <a href="mailto:support@astra-via.com">support@astra-via.com</a> to ask about access or retention. <Link href="/privacy">Product privacy notice</Link>.</p><SetPassword auth={auth!} /></section>}
             {tab === 'admin' && state.admin && (admin ? <Admin state={state} management={admin} run={run} busy={busy} loadPreview={loadPublicationPreview} onOpen={doc => void openDocument(doc, false)} refresh={offset => refresh(true, offset).catch(e => setError(e.message))} /> : <p>Loading management controls…</p>)}
@@ -151,19 +161,19 @@ export default function InvestorRoom({ config }: { config: { enabled: boolean; u
           </>}
         </>}
       </>}
-      <AstraMethod />
+      {signedIn ? <details className="ir-about-astra"><summary>Explore the thinking behind Astra</summary><AstraMethod /></details> : <AstraMethod />}
       <p className="ir-confidential"><span aria-hidden="true">{'[ PRIVATE BY DESIGN ]'}</span> Individual access · Personalized copies · <a href="mailto:support@astra-via.com">Get in touch</a></p>
       {invitation && <section className="ir-panel"><h3>Invitation created</h3><p>No email has been sent. Copy this one-time link and share it privately with the investor. It expires under the Supabase invitation settings.</p><label>Private invitation link<input readOnly value={invitation} onFocus={e => e.target.select()} /></label><button onClick={() => setInvitation('')}>Hide link</button></section>}
     </main><SiteFooter />
-    {preview && <div className="ir-modal" role="dialog" aria-modal="true" aria-labelledby="ir-preview-title"><div className="ir-modal-header"><h2 id="ir-preview-title">{preview.title}</h2><button autoFocus onClick={closePreview}>Close preview ✕</button></div><p className="ir-small">Personalized copy. Preview access cannot prevent screenshots or copying.</p><iframe title={`Personalized PDF: ${preview.title}`} src={`${preview.url}#toolbar=0`} /></div>}
+    {preview && <InvestorDocumentViewer url={preview.url} title={preview.title} onClose={closePreview} />}
     {shareDoc && <div className="ir-modal ir-share-modal" role="dialog" aria-modal="true" aria-labelledby="ir-share-title"><div className="ir-modal-header"><h2 id="ir-share-title">Request colleague access</h2><button autoFocus onClick={() => setShareDoc(null)}>Close ✕</button></div><p>{shareDoc.title}</p><p>The administrator reviews each request. Your colleague will need a verified account and their own approval.</p><form onSubmit={e => void submit(e, 'share')}><input type="hidden" name="document_id" value={shareDoc.id} /><label>Colleague’s email<input type="email" name="email" required maxLength={254} /></label><button className="ir-primary" disabled={busy}>Submit access request</button></form></div>}
   </div>;
 }
 
-function DocumentLibrary({ state, busy, onOpen, onShare }: { state: State; busy: boolean; onOpen: (doc: Doc, download: boolean) => Promise<void>; onShare: (doc: Doc) => void }) {
-  const [category, setCategory] = useState('All documents');
-  const filtered = state.documents.filter(d => category === 'All documents' || d.category === category);
-  return <section><div className="ir-library-heading"><div><p className="ir-code-label">02 / THE EVIDENCE ROOM</p><h2>Explore the <em>substance.</em></h2><p>Your approved materials. A personal copy, a clear trail.</p></div><label>Filter by category<select value={category} onChange={e => setCategory(e.target.value)}>{['All documents', ...state.categories].map(c => <option key={c}>{c}</option>)}</select></label></div><div className="ir-documents">{filtered.map((doc, i) => <article className="ir-document" key={doc.id}><div className="ir-doc-top"><span className="ir-code-label">{String(i + 1).padStart(2, '0')} / {doc.category}</span><span className="ir-pdf">PDF</span>{state.admin && <small>{doc.published ? 'Published' : 'Draft'}</small>}</div><h3>{doc.title}</h3><p>{doc.description}</p><div className="ir-document-version">VERSION {doc.version} <span>·</span> {doc.pages} PAGES</div><div className="ir-doc-actions"><button className="ir-primary" disabled={busy} onClick={() => void onOpen(doc, false)}>Open document <span aria-hidden="true">↗</span></button>{(doc.can_download || state.admin) && <button disabled={busy} onClick={() => void onOpen(doc, true)}>Download PDF</button>}<button disabled={busy} onClick={() => onShare(doc)}>Request colleague access</button></div></article>)}</div>{!filtered.length && <section className="ir-library-empty"><span className="ir-empty-brackets" aria-hidden="true">{'[ · ]'}</span><div><p className="ir-code-label">ROOM TO EXPLORE</p><h3>{state.documents.length ? 'A different perspective, perhaps?' : 'The first chapter is still ahead.'}</h3><p>{state.documents.length ? 'No materials in this category yet. Choose another category to keep exploring.' : state.admin ? 'Upload a PDF in Manage room, then publish it and choose who can explore it.' : 'Your approved documents will appear here as the team shares them with you.'}</p></div></section>}</section>;
+export function DocumentLibrary({ state, busy, onOpen, onShare }: { state: State; busy: boolean; onOpen: (doc: Doc, download: boolean) => Promise<void>; onShare: (doc: Doc) => void }) {
+  const [category, setCategory] = useState('All documents'), [search, setSearch] = useState(''), [filtersOpen, setFiltersOpen] = useState(false);
+  const filtered = state.documents.filter(d => (category === 'All documents' || d.category === category) && `${d.title} ${d.description}`.toLowerCase().includes(search.trim().toLowerCase()));
+  return <section><div className="ir-library-heading"><div><p className="ir-code-label">02 / THE EVIDENCE ROOM</p><h2>Your <em>documents.</em></h2><p>Read your approved materials, search by title, or filter by category.</p></div></div><div className="ir-library-controls" data-filters-open={filtersOpen}><label>Search documents<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a document" /></label><button type="button" className="ir-category-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(value => !value)}>Filter</button><label className="ir-category-control">Category<select value={category} onChange={e => setCategory(e.target.value)}>{['All documents', ...state.categories].map(c => <option key={c}>{c}</option>)}</select></label></div><div className="ir-library-results"><p className="ir-library-count" role="status">{filtered.length} {filtered.length === 1 ? 'document' : 'documents'} available</p>{(search || category !== 'All documents') && <button type="button" className="ir-text-button" onClick={() => { setSearch(''); setCategory('All documents'); }}>Clear filters</button>}</div><div className="ir-documents">{filtered.map((doc, i) => <article className="ir-document" key={doc.id}><div className="ir-doc-top"><span className="ir-code-label">{String(i + 1).padStart(2, '0')} / {doc.category}</span><span className="ir-pdf">PDF</span>{state.admin && <small>{doc.published ? 'Published' : 'Draft'}</small>}</div><h3>{doc.title}</h3><p>{doc.description}</p><div className="ir-document-version">VERSION {doc.version} <span>·</span> {doc.pages} PAGES</div><div className="ir-doc-actions"><button className="ir-primary" disabled={busy} onClick={() => void onOpen(doc, false)}>Open document <span aria-hidden="true">↗</span></button>{(doc.can_download || state.admin) && <button disabled={busy} onClick={() => void onOpen(doc, true)}>Download PDF</button>}<button disabled={busy} onClick={() => onShare(doc)}>Request colleague access</button></div></article>)}</div>{!filtered.length && <section className="ir-library-empty"><span className="ir-empty-brackets" aria-hidden="true">{'[ · ]'}</span><div><p className="ir-code-label">ROOM TO EXPLORE</p><h3>{state.documents.length ? 'A different perspective, perhaps?' : 'The first chapter is still ahead.'}</h3><p>{state.documents.length ? 'No materials in this category yet. Choose another category to keep exploring.' : state.admin ? 'Upload a PDF in Manage room, then publish it and choose who can explore it.' : 'Your approved documents will appear here as the team shares them with you.'}</p></div></section>}</section>;
 }
 
 function ProfileName({ auth, name, onSaved }: { auth: SupabaseClient; name: string; onSaved: () => void }) {
@@ -208,7 +218,7 @@ function SetPassword({ auth, initiallyOpen = false, onSaved }: { auth: SupabaseC
 function Questions({ questions, run, busy }: { questions: Question[]; run?: Run; busy?: boolean }) {
   return <div className="ir-questions">{questions.map(q => <article key={q.id}><p className="ir-small">{run && `${q.email} · `}{date(q.created_at)}</p><h3>{q.question}</h3><p className="ir-answer">{q.answer || 'Awaiting a reply.'}</p>{run && <form onSubmit={e => { e.preventDefault(); void run({ action: 'answer', id: q.id, answer: new FormData(e.currentTarget).get('answer') }).catch(() => {}); }}><label>Private reply<textarea name="answer" defaultValue={q.answer} maxLength={8000} rows={3} required /></label><button disabled={busy}>Save reply</button></form>}</article>)}</div>;
 }
-function Admin({ state, management, run, busy, refresh, loadPreview, onOpen }: { state: State; management: Administration; run: Run; busy: boolean; refresh: (offset: number) => void; loadPreview: (doc: Doc, signal: AbortSignal) => Promise<Blob>; onOpen: (doc: Doc) => void }) {
+export function Admin({ state, management, run, busy, refresh, loadPreview, onOpen }: { state: State; management: Administration; run: Run; busy: boolean; refresh: (offset: number) => void; loadPreview: (doc: Doc, signal: AbortSignal) => Promise<Blob>; onOpen: (doc: Doc) => void }) {
   const [section, setSection] = useState('Documents');
   return <div className="ir-admin"><nav className="ir-subtabs" aria-label="Management sections">{['Documents', 'Investors', 'Permissions', 'Confidentiality', 'Questions', 'Sharing', 'Audit'].map(s => <button key={s} aria-current={section === s ? 'page' : undefined} onClick={() => setSection(s)}>{s}</button>)}</nav>
     {section === 'Documents' && <><section className="ir-panel"><h2>Upload a document</h2><p>PDF only · up to 25 MB · 200 pages. Uploads start as drafts. Use a new upload for each version so prior copies remain traceable.</p><form onSubmit={async e => { e.preventDefault(); const form = e.currentTarget; try { await run(new FormData(form)); form.reset(); } catch {} }}><div className="ir-form-grid"><label>Document title<input name="title" maxLength={200} required /></label><label>Version<input name="version" placeholder="e.g. 2026.10" maxLength={40} required /></label><label>Category<select name="category">{state.categories.map(c => <option key={c}>{c}</option>)}</select></label><label>PDF file<input name="file" type="file" accept="application/pdf,.pdf" required /></label></div><label>Description<textarea name="description" maxLength={2000} rows={2} /></label><button className="ir-primary" disabled={busy}>Upload private PDF</button></form></section><section className="ir-panel"><h2>Publication</h2><p>Publication makes a document available only to investors who also have a grant.</p><InvestorPublicationList documents={state.documents} busy={busy} loadPreview={loadPreview} onOpen={onOpen} onPublish={doc => void run({ action: 'publish', document_id: doc.id, published: !doc.published }).catch(() => {})} /></section></>}
