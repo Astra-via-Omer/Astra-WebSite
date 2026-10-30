@@ -5,7 +5,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { PDFDocument, PDFName, StandardFonts } from 'pdf-lib';
 import { assertDocument, assertMembership, emailField, limitedBody, type Member, type RoomDocument } from '../src/investors/policy';
 import { preparePdf, watermarkPdf } from '../src/investors/pdf';
-const member: Member = { user_id: '00000000-0000-0000-0000-000000000002', email: 'investor@example.invalid', role: 'investor', expires_at: null, stage: 'invited', nda_version: null, organization: '' };
+const member: Member = { user_id: '00000000-0000-0000-0000-000000000002', email: 'investor@example.invalid', role: 'investor', tab_access: ['overview', 'documents', 'updates', 'questions'], expires_at: null, stage: 'invited', nda_version: null, organization: '' };
 test('access fails closed for unapproved, suspended, unverified, missing and expired memberships', () => {
   const verified = { email_confirmed_at: '2026-01-01T00:00:00Z', app_metadata: {} };
   assert.doesNotThrow(() => assertMembership(verified, true, member));
@@ -66,6 +66,17 @@ test('migration is repeatable; RLS blocks direct REST and preserves all existing
     const meta = (await db.query<{raw_app_meta_data:unknown}>('select raw_app_meta_data from auth.users where id=$1', [investor])).rows[0].raw_app_meta_data as { system_access: Record<string, boolean> };
     assert.equal(meta.system_access.investor_room, true); assert.equal(meta.system_access.workflow, false); assert.equal(meta.system_access.lab, true);
     await db.query(`insert into public.astra_investor_members(user_id,email) values($1,$2)`, [investor, member.email]);
+    const roleTabs = await readFile(new URL('../database/010_investor_roles_and_tabs.sql', import.meta.url), 'utf8');
+    await db.exec(roleTabs);
+    assert.deepEqual((await db.query<{tab_access:string[]}>('select tab_access from public.astra_investor_members where user_id=$1',[investor])).rows[0].tab_access, ['overview','documents','updates','questions']);
+    await db.query("update public.astra_investor_members set role='power_user',tab_access=array['overview','documents'] where user_id=$1",[investor]);
+    await db.exec(roleTabs);
+    assert.deepEqual((await db.query<{tab_access:string[]}>('select tab_access from public.astra_investor_members where user_id=$1',[investor])).rows[0].tab_access, ['overview','documents'], 'Rerunning the migration preserves explicit permissions');
+    await assert.rejects(db.query("update public.astra_investor_members set tab_access=array['admin'] where user_id=$1",[investor]), /check constraint/);
+    await db.exec('begin');
+    await db.query("insert into public.astra_investor_members(user_id,email,role) values($1,$2,'investor')",[owner,'owner@example.invalid']);
+    assert.deepEqual((await db.query<{tab_access:string[]}>('select tab_access from public.astra_investor_members where user_id=$1',[owner])).rows[0].tab_access, ['overview']);
+    await db.exec('rollback');
     await db.query("select set_config('request.jwt.claim.sub',$1,false)", [investor]); await db.exec('set role authenticated');
     for (const table of ['members', 'documents', 'grants', 'events', 'settings', 'questions', 'shares']) await assert.rejects(db.query(`select * from public.astra_investor_${table}`), /permission denied/);
     assert.equal((await db.query('update public.astra_user_system_access set investor_room=false where user_id=$1 returning user_id', [investor])).rows.length, 0);
