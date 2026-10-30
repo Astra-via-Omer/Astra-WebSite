@@ -205,3 +205,36 @@ owner/counsel process and is not established by an approval checkbox.
 
 
 Preview sign-in accepts the existing account email and password for every approved role. No authenticator enrollment, OTP or phone challenge is required. Current account, role, approval, membership, NDA integrity and document grants remain enforced. Complete the shared Workspace migration and old-factor cleanup when deploying.
+
+### Room roles and approved tabs
+
+Apply `database/010_investor_roles_and_tabs.sql` to the Investor Room's configured
+Supabase project before deploying this release. It preserves all existing content
+tabs for existing memberships. New investors start with Overview only. Repeating
+the migration preserves subsequent tab selections. Shared Astra identity roles,
+investor approval, expiry, confidentiality records and document grants are unchanged.
+
+In **Manage room → Permissions → Room roles & tabs**, administrators can change
+another member's room role and approve Overview, Documents, Astra updates and
+Questions individually. Your account is always available. Administrators cannot
+change their own role or tabs through these controls.
+
+- **Investor:** only the selected content tabs; document previews and downloads
+  still require individual document grants.
+- **Astra power user:** every investor-facing tab and previews of every published
+  document. Downloads still require separate approval. Drafts, Manage room,
+  permission changes and other members' private conversations remain restricted.
+- **Investor administrator:** all content and Manage room, including draft
+  document previews and the existing administrative controls.
+
+The server filters state and enforces the same rules on direct document requests
+and question submissions. An Updates-only investor can preview a granted PDF in
+the Investor updates category without receiving unrelated document metadata.
+Power users and investors see only their own questions. Verified account,
+individual approval, expiry and confidentiality checks apply to every role.
+
+Role/tab changes are audited. Live refresh closes open previews when permissions
+are reduced, clears management data after administrator access is removed, and
+moves the reader to an available tab. Desktop and mobile navigation both use the
+server's allowed-tab list. Account-specific settings and rollout receipts stay
+private and must not be committed to this public repository.

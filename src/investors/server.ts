@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Storage } from '@google-cloud/storage';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { isIP } from 'node:net';
-import { assertDocument, assertMembership, categories, emailField, limitedBody, RoomError, textField, uuid, type Member, type RoomDocument } from './policy';
+import { assertDocument, assertMembership, assertTab, memberTabs, roomRoles, tabAccessField, categories, emailField, limitedBody, RoomError, textField, uuid, type Member, type RoomDocument } from './policy';
 import { preparePdf, watermarkPdf } from './pdf';
 import { mailConfig, sendRecoveryEmail } from './mail';
 import { investorDisplayName } from './presentation';
@@ -109,22 +109,27 @@ async function directoryMembers(ctx: Context) {
 export async function roomState(ctx: Context) {
   const room = await settings(ctx);
   const canRead = ctx.member.role === 'admin' ? true : (!!room.nda_text && !!room.nda_version && ctx.member.nda_version === room.nda_version && (!integrityReady() || (!!room.nda_sha256 && ctx.member.nda_sha256 === room.nda_sha256)));
-  const admin = ctx.member.role === 'admin';
+  const admin = ctx.member.role === 'admin', tabs = memberTabs(ctx.member);
+  const canSeeDocuments = tabs.includes('documents'), canSeeUpdates = tabs.includes('updates');
   let docs: Record<string, unknown>[] = [];
-  if (canRead) {
+  if (canRead && (canSeeDocuments || canSeeUpdates)) {
     if (admin) docs = checked(await ctx.db.from(tables.documents).select('id,title,category,version,description,pages,bytes,published,created_at').order('created_at', { ascending: false })) || [];
     else {
-      const grants = checked(await ctx.db.from(tables.grants).select('document_id,can_view,can_download').eq('user_id', ctx.member.user_id).eq('can_view', true)) || [];
-      if (grants.length) {
-        const rows = checked(await ctx.db.from(tables.documents).select('id,title,category,version,description,pages,bytes,published,created_at').in('id', grants.map(g => g.document_id)).eq('published', true).order('created_at', { ascending: false })) || [];
+      const grants = checked(await ctx.db.from(tables.grants).select('document_id,can_view,can_download').eq('user_id', ctx.member.user_id)) || [];
+      const readable = grants.filter(g => g.can_view);
+      if (ctx.member.role === 'power_user' || readable.length) {
+        let query = ctx.db.from(tables.documents).select('id,title,category,version,description,pages,bytes,published,created_at').eq('published', true);
+        if (ctx.member.role !== 'power_user') query = query.in('id', readable.map(g => g.document_id));
+        if (!canSeeDocuments) query = query.eq('category', 'Investor updates');
+        const rows = checked(await query.order('created_at', { ascending: false })) || [];
         docs = rows.map(d => ({ ...d, can_download: grants.find(g => g.document_id === d.id)?.can_download === true }));
       }
     }
   }
-  const questions = canRead ? checked(await (admin ? ctx.db.from(tables.questions).select('*').in('user_id', (await directoryMembers(ctx)).map(m => m.user_id)) : ctx.db.from(tables.questions).select('*').eq('user_id', ctx.member.user_id)).order('created_at', { ascending: false }).limit(100)) : [];
+  const questions = canRead && tabs.includes('questions') ? checked(await (admin ? ctx.db.from(tables.questions).select('*').in('user_id', (await directoryMembers(ctx)).map(m => m.user_id)) : ctx.db.from(tables.questions).select('*').eq('user_id', ctx.member.user_id)).order('created_at', { ascending: false }).limit(100)) : [];
   if (integrityReady()) checked(await ctx.db.rpc('astra_investor_record_room_open', { p_user_id: ctx.member.user_id, p_email: ctx.member.email, p_session_hash: createHash('sha256').update(ctx.sessionId).digest('hex') }));
   else await audit(ctx, 'room_opened');
-  return { member: ctx.member, admin, nda: room, canRead, documents: docs, questions, categories, progress: await readInvestorProgress(canRead) };
+  return { member: ctx.member, admin, nda: room, canRead, documents: docs, questions, categories, tabs, progress: await readInvestorProgress(canRead && canSeeUpdates) };
 }
 export async function adminState(ctx: Context, offset: number) {
   administrator(ctx);
@@ -188,7 +193,7 @@ export async function mutate(ctx: Context, body: Record<string, unknown>) {
     checked(await db.from(tables.members).update({ nda_version: room.nda_version, ...(integrityReady() ? { nda_sha256: room.nda_sha256 } : {}), nda_accepted_at: new Date().toISOString() }).eq('user_id', ctx.member.user_id));
     await audit(ctx, 'nda_accepted', { version: room.nda_version, sha256: room.nda_sha256 });
   } else if (body.action === 'question') {
-    await ndaRequired(ctx); const question = textField(body.question, 4000);
+    await ndaRequired(ctx); assertTab(ctx.member, 'questions'); const question = textField(body.question, 4000);
     await audit(ctx, 'question_submission_requested');
     checked(await db.from(tables.questions).insert({ user_id: ctx.member.user_id, email: ctx.member.email, question }));
     await audit(ctx, 'question_submitted');
@@ -205,7 +210,9 @@ export async function mutate(ctx: Context, body: Record<string, unknown>) {
       checked(await db.from(tables.settings).update({ nda_text: nda, nda_version: version, ...(integrityReady() ? { nda_published_by: ctx.member.user_id } : {}), updated_at: new Date().toISOString() }).eq('id', true));
       await audit(ctx, 'nda_published', { version });
     } else if (body.action === 'member') {
-      const email = emailField(body.email); const role = body.role === 'admin' ? 'admin' : 'investor';
+      const email = emailField(body.email);
+      const role = typeof body.role === 'string' && (roomRoles as readonly string[]).includes(body.role) ? body.role : null;
+      if (!role) throw new RoomError(400, 'Choose a valid room role.');
       const expires = body.expires_at ? textField(body.expires_at, 40) : null;
       if (expires && (!Number.isFinite(Date.parse(expires)) || Date.parse(expires) <= Date.now())) throw new RoomError(400, 'Choose an expiry in the future.');
       const stages = ['invited', 'reviewing', 'follow-up', 'committed', 'closed'];
@@ -219,12 +226,24 @@ export async function mutate(ctx: Context, body: Record<string, unknown>) {
         userId = invite.data.user.id; inviteLink = (process.env.ASTRA_INVESTOR_ORIGIN || 'https://astra-via.com') + '/investors#token_hash=' + encodeURIComponent(invite.data.properties.hashed_token) + '&type=invite';
       }
       if (userId === ctx.member.user_id) throw new RoomError(400, 'Use another administrator to change your own investor access.');
-      checked(await db.from(tables.members).upsert({ user_id: userId, email, role, organization: textField(body.organization || '', 200, false), expires_at: expires, stage }, { onConflict: 'user_id' }));
+      const prior = checked(await db.from(tables.members).select('tab_access').eq('user_id', userId).maybeSingle());
+      const tabAccess = body.tab_access === undefined ? (prior?.tab_access || ['overview']) : tabAccessField(body.tab_access);
+      checked(await db.from(tables.members).upsert({ user_id: userId, email, role, tab_access: tabAccess, organization: textField(body.organization || '', 200, false), expires_at: expires, stage }, { onConflict: 'user_id' }));
       // This only sets the Investor Room flag; other system approvals are untouched.
       const updated = checked(await db.from('astra_user_system_access').update({ investor_room: body.approved === true }).eq('user_id', userId).select('user_id'));
       if (!updated?.length) throw new RoomError(409, 'The shared system approval record is missing. Check the Supabase setup.');
-      await audit(ctx, 'member_saved', { user_id: userId, email, approved: body.approved === true });
+      await audit(ctx, 'member_saved', { user_id: userId, email, role, tab_access: tabAccess, approved: body.approved === true });
       return { invitation: inviteLink || null };
+    } else if (body.action === 'member-access') {
+      const userId = uuid(body.user_id);
+      if (userId === ctx.member.user_id) throw new RoomError(400, 'Use another administrator to change your own investor access.');
+      const role = typeof body.role === 'string' && (roomRoles as readonly string[]).includes(body.role) ? body.role : null;
+      if (!role) throw new RoomError(400, 'Choose a valid room role.');
+      const tabAccess = tabAccessField(body.tab_access);
+      await audit(ctx, 'room_permissions_change_requested', { user_id: userId, role, tab_access: tabAccess });
+      const updated = checked(await db.from(tables.members).update({ role, tab_access: tabAccess }).eq('user_id', userId).select('user_id'));
+      if (!updated?.length) throw new RoomError(404, 'The investor membership was not found.');
+      await audit(ctx, 'room_permissions_changed', { user_id: userId, role, tab_access: tabAccess });
     } else if (body.action === 'grant') {
       const userId = uuid(body.user_id), docId = uuid(body.document_id);
       await audit(ctx, 'document_permission_change_requested', { user_id: userId, can_view: body.can_view === true, can_download: body.can_view === true && body.can_download === true }, docId);

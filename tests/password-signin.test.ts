@@ -65,7 +65,7 @@ function fixture() {
  });
  const token = 'synthetic.' + Buffer.from(JSON.stringify({ aal: 'aal1' })).toString('base64url') + '.password-session';
  const request = new Request('https://astra-via.com/api/investors', { headers: { Authorization: 'Bearer ' + token } });
- return { server: module.exports, member, user, approval, events, state, verifiedTokens, token, request };
+ return { server: module.exports, member, user, approval, events, state, verifiedTokens, token, request, tables };
 }
 test('an approved investor administrator can manage the room after password sign-in', async () => {
  const f = fixture(), ctx = await f.server.context(f.request);
@@ -93,4 +93,42 @@ test('revoked sessions and disabled or expired accounts remain blocked', async (
  await assert.rejects(f.server.context(f.request), /suspended/);
  f.user.app_metadata.disabled = false; f.member.expires_at = '2020-01-01';
  await assert.rejects(f.server.context(f.request), /expired/);
+});
+
+test('power users see published previews and their own questions without any management capability', async () => {
+ const f = fixture(); f.member.role = 'power_user'; f.member.nda_version = 'test-version';
+ f.tables.astra_investor_documents.push({ id: 'published', title: 'Published material', published: true, category: 'Company overview' });
+ f.tables.astra_investor_questions.push({ id: 'own', user_id: f.user.id }, { id: 'another-person', user_id: 'another-user' });
+ const ctx = await f.server.context(f.request), state = await f.server.roomState(ctx);
+ assert.equal(state.admin, false); assert(!state.tabs.includes('admin'));
+ assert.equal(state.tabs.length, 5); assert.equal(state.documents.length, 1); assert.equal(state.documents[0].id, 'published');
+ assert.equal(state.documents[0].can_download, false); assert.equal(state.questions.length, 1); assert.equal(state.questions[0].id, 'own');
+ for (const action of ['member-access','member','grant','publish','save-nda','answer','resolve-share']) await assert.rejects(f.server.mutate(ctx,{action}), /administrator access/);
+ await assert.rejects(f.server.adminState(ctx,0), /administrator access/);
+});
+test('unapproved tabs do not leak documents, updates or question data and cannot submit questions', async () => {
+ const f = fixture(); f.member.role = 'investor'; f.member.nda_version = 'test-version'; f.member.tab_access = ['overview'];
+ f.tables.astra_investor_documents.push({ id:'published',title:'Restricted material',published:true,category:'Company overview' });
+ f.tables.astra_investor_grants.push({ user_id:f.user.id,document_id:'published',can_view:true,can_download:true });
+ f.tables.astra_investor_questions.push({ id:'own',user_id:f.user.id });
+ const ctx = await f.server.context(f.request); let state = await f.server.roomState(ctx);
+ assert.equal(state.documents.length,0); assert.equal(state.questions.length,0); assert.equal(state.progress,null);
+ assert.equal(state.tabs.join(','),'overview,account');
+ await assert.rejects(f.server.mutate(ctx,{action:'question',question:'Unapproved request'}), /not approved/);
+ f.member.tab_access = ['updates'];
+ f.tables.astra_investor_documents.push({ id:'update',title:'Approved briefing',published:true,category:'Investor updates' });
+ f.tables.astra_investor_grants.push({ user_id:f.user.id,document_id:'update',can_view:true,can_download:false });
+ state = await f.server.roomState(ctx);
+ assert.equal(state.documents.length,1); assert.equal(state.documents[0].id,'update'); assert(state.progress);
+});
+test('only administrators can atomically save valid room roles and tabs while preserving other access', async () => {
+ const f = fixture(), ctx = await f.server.context(f.request), target='00000000-0000-0000-0000-000000000002';
+ f.tables.astra_investor_members.push({ user_id:target,email:'person@example.invalid',role:'investor',tab_access:['overview'],expires_at:null,organization:'Original organization' });
+ await f.server.mutate(ctx,{action:'member-access',user_id:target,role:'power_user',tab_access:['overview']});
+ const saved=f.tables.astra_investor_members[1]; assert.equal(saved.role,'power_user'); assert.equal(saved.organization,'Original organization');
+ assert.equal(f.approval.investor_room,true); assert.equal(f.member.role,'admin');
+ assert(f.events.some(e=>e.action==='room_permissions_changed'));
+ await assert.rejects(f.server.mutate(ctx,{action:'member-access',user_id:target,role:'super_admin',tab_access:[]}),/valid room role/);
+ await assert.rejects(f.server.mutate(ctx,{action:'member-access',user_id:target,role:'investor',tab_access:['admin']}),/valid investor tabs/);
+ await assert.rejects(f.server.mutate(ctx,{action:'member-access',user_id:f.user.id,role:'investor',tab_access:[]}),/another administrator/);
 });

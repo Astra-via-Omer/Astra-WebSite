@@ -264,3 +264,21 @@
 }
 
 .ir-progress-measurement-note { color: var(--ir-muted); font-size: 14px; line-height: 1.7; margin: -24px 0 36px; max-width: 90ch; }
+
+.ir-room-access-fields { margin: 24px 0; display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.8fr); gap: 28px; align-items: start; }
+.ir-room-access-fields fieldset { border: 1px solid var(--ir-line); padding: 18px 20px 8px; margin: 0; min-width: 0; }
+.ir-room-access-fields legend { font-size: 16px; padding: 0 8px; }
+.ir-tab-approvals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
+.ir-tab-approvals .ir-check { min-height: 44px; font-size: 16px; }
+.ir-tab-approvals input:disabled { opacity: .65; }
+.ir-permission-person { border-top: 1px solid var(--ir-line); padding: 12px 0; }
+.ir-permission-person > summary { padding: 12px 0; font-size: 17px; overflow-wrap: anywhere; }
+.ir-permission-person > summary > span { display: inline-block; margin: 0 0 0 14px; border: 1px solid var(--ir-line); padding: 4px 10px; font-size: 13px; color: var(--ir-accent); }
+.ir-member-access-form { padding: 0 0 12px; }
+.investor-page .ir-permission-note { display: block; font-size: 14px; line-height: 1.7; color: var(--ir-muted); margin: 12px 0; }
+@media (max-width: 700px) {
+ .ir-room-access-fields { grid-template-columns: 1fr; gap: 22px; }
+ .ir-tab-approvals { grid-template-columns: 1fr; gap: 4px; }
+ .ir-permission-person > summary > span { margin: 8px 0 0; }
+ .ir-member-access-form > button { width: 100%; }
+}
