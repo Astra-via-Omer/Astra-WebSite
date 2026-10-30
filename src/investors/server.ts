@@ -7,6 +7,7 @@ import { assertDocument, assertMembership, categories, emailField, limitedBody, 
 import { preparePdf, watermarkPdf } from './pdf';
 import { mailConfig, sendRecoveryEmail } from './mail';
 import { investorDisplayName } from './presentation';
+import { readInvestorProgress } from './dispatchFeed';
 
 const tables = { members: 'astra_investor_members', settings: 'astra_investor_settings', documents: 'astra_investor_documents', grants: 'astra_investor_grants', events: 'astra_investor_events', questions: 'astra_investor_questions', shares: 'astra_investor_shares' };
 export const privateHeaders = { 'Cache-Control': 'private, no-store, max-age=0', Pragma: 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex, nofollow, noarchive' };
@@ -123,7 +124,7 @@ export async function roomState(ctx: Context) {
   const questions = canRead ? checked(await (admin ? ctx.db.from(tables.questions).select('*').in('user_id', (await directoryMembers(ctx)).map(m => m.user_id)) : ctx.db.from(tables.questions).select('*').eq('user_id', ctx.member.user_id)).order('created_at', { ascending: false }).limit(100)) : [];
   if (integrityReady()) checked(await ctx.db.rpc('astra_investor_record_room_open', { p_user_id: ctx.member.user_id, p_email: ctx.member.email, p_session_hash: createHash('sha256').update(ctx.sessionId).digest('hex') }));
   else await audit(ctx, 'room_opened');
-  return { member: ctx.member, admin, nda: room, canRead, documents: docs, questions, categories };
+  return { member: ctx.member, admin, nda: room, canRead, documents: docs, questions, categories, progress: await readInvestorProgress(canRead) };
 }
 export async function adminState(ctx: Context, offset: number) {
   administrator(ctx);

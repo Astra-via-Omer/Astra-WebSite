@@ -52,12 +52,20 @@ published on the Astra website. The fingerprint is a visual metaphor; the page
 does not collect biometric information.
 
 After sign-in, **Overview** shows the investor's available published materials,
-their personal signature card, and **The Astra Dispatch**. Dispatch entries are
-published PDFs in the existing **Investor updates** category. They appear only
-after the investor also has the required document grant and current agreement.
-Upload, publish and grant these updates using the existing management controls.
-There are no generated company announcements, inferred investment metrics or
-public exposure of private updates. Empty areas explain when material will appear.
+their personal signature card, and **The Astra Dispatch**. The Dispatch combines
+an investor-only progress timeline, dated aggregate activity snapshots, and the
+existing **Investor updates** PDFs. Timeline content is read server-side from
+`investor-dispatch/current.json` in the existing private document bucket only
+after the current room agreement permits reading. Internal evidence URLs and
+collection details are removed from the response. Content and measurements must
+never be committed to this public repository or placed in `public/`.
+
+PDF briefings retain their individual document grants, publication controls and
+personalized delivery. Company timeline summaries are shared with all currently
+approved room readers under the room agreement. The daily publishing scope,
+source rules, metric definitions, recovery steps and schedule are documented in
+[the dispatch runbook](investor-dispatch/README.md). No new database, service,
+credential or investor permission is required.
 
 The welcome uses the current account's `astra_investor_name`, `full_name`, `name`
 or `display_name`, falling back to a readable email username. **Your account**

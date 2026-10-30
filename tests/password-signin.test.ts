@@ -59,6 +59,7 @@ function fixture() {
    if (name === './mail') return { mailConfig: () => null };
    if (name === './policy') return policy;
    if (name === './presentation') return { investorDisplayName: () => 'Owner' };
+   if (name === './dispatchFeed') return { readInvestorProgress: async (canRead: boolean) => canRead ? { entries: [{ id: 'private-progress' }] } : null };
    return require(name);
   },
  });
@@ -71,13 +72,15 @@ test('an approved investor administrator can manage the room after password sign
  assert.deepEqual(f.verifiedTokens, [f.token]);
  const state = await f.server.roomState(ctx);
  assert.equal(state.admin, true); assert.equal(state.documents[0].published, false);
+ assert.equal(state.progress.entries[0].id, 'private-progress');
  assert.equal((await f.server.adminState(ctx, 0)).members[0].user_id, f.user.id);
  assert(f.events.some(event => event.action === 'room_opened'));
 });
 test('password sign-in retains investor membership and role boundaries', async () => {
  const f = fixture(); f.member.role = 'investor';
  const ctx = await f.server.context(f.request);
- assert.equal((await f.server.roomState(ctx)).admin, false);
+ const state = await f.server.roomState(ctx);
+ assert.equal(state.admin, false); assert.equal(state.canRead, false); assert.equal(state.progress, null);
  await assert.rejects(f.server.adminState(ctx, 0), /administrator access/);
  await assert.rejects(f.server.mutate(ctx, { action: 'save-nda', text: 'Forged' }), /administrator access/);
  f.approval.investor_room = false;
