@@ -64,6 +64,7 @@
 .ir-list-row { font-size: 16px; gap: 20px; padding: 20px 0; }
 .ir-subtabs { gap: 10px; margin-bottom: 28px; }
 .investor-page .ir-subtabs button { font-size: 15px; }
+.investor-page .ir-subtabs button[aria-current] { background: var(--ir-accent); color: var(--ir-ink); }
 .investor-page table, .investor-page td summary { font-size: 15px; }
 .ir-publication-title > span:first-child { font-size: 16px; }
 .ir-publication-preview { z-index: 85; }
@@ -275,10 +276,34 @@
 .ir-permission-person > summary { padding: 12px 0; font-size: 17px; overflow-wrap: anywhere; }
 .ir-permission-person > summary > span { display: inline-block; margin: 0 0 0 14px; border: 1px solid var(--ir-line); padding: 4px 10px; font-size: 13px; color: var(--ir-accent); }
 .ir-member-access-form { padding: 0 0 12px; }
+.ir-user-control-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.ir-user-control-heading > div { max-width: 75ch; }
+.ir-user-control-heading > button { flex-shrink: 0; }
+.investor-page .ir-user-control-heading .ir-code-label { font-size: 11px; margin: 0 0 12px; }
+.ir-role-help { margin: 12px 0 24px; }
+.ir-role-help > summary { min-height: 48px; padding: 12px 0; color: var(--ir-accent); }
+.ir-role-guide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 28px 0; }
+.ir-role-guide article { border: 1px solid var(--ir-line); padding: 20px; }
+.investor-page .ir-role-guide h3 { color: var(--ir-accent); font-size: 18px; margin: 0 0 10px; }
+.investor-page .ir-role-guide p { font-size: 15px; line-height: 1.7; margin: 0; }
+.ir-user-filters { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr); gap: 20px; }
+.ir-user-current { overflow-wrap: anywhere; margin: 14px 0 24px; }
+.investor-page .ir-user-current p { font-size: 15px; margin: 8px 0; }
+.ir-user-self { border-top: 1px solid var(--ir-line); padding: 20px 0; }
+.investor-page .ir-user-self h3 { font-size: 17px; overflow-wrap: anywhere; }
+.ir-user-self h3 > span { font-size: 13px; color: var(--ir-accent); margin-left: 12px; }
+.ir-user-empty { border-block: 1px solid var(--ir-line); padding: 24px 0; }
 .investor-page .ir-permission-note { display: block; font-size: 14px; line-height: 1.7; color: var(--ir-muted); margin: 12px 0; }
+@media (max-width: 1050px) {
+ .ir-user-control-heading { display: block; }
+ .ir-role-guide { grid-template-columns: 1fr; }
+}
 @media (max-width: 700px) {
  .ir-room-access-fields { grid-template-columns: 1fr; gap: 22px; }
  .ir-tab-approvals { grid-template-columns: 1fr; gap: 4px; }
  .ir-permission-person > summary > span { margin: 8px 0 0; }
  .ir-member-access-form > button { width: 100%; }
+ .ir-user-control-heading > button { width: 100%; }
+ .ir-user-filters { grid-template-columns: 1fr; }
+ .ir-user-self h3 > span { display: block; margin: 8px 0 0; }
 }

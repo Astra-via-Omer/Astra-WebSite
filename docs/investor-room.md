@@ -214,10 +214,18 @@ tabs for existing memberships. New investors start with Overview only. Repeating
 the migration preserves subsequent tab selections. Shared Astra identity roles,
 investor approval, expiry, confidentiality records and document grants are unchanged.
 
-In **Manage room → Permissions → Room roles & tabs**, administrators can change
+In **Manage room → User control**, administrators can change
 another member's room role and approve Overview, Documents, Astra updates and
 Questions individually. Your account is always available. Administrators cannot
 change their own role or tabs through these controls.
+
+User control opens first in Manage room. Search by name, email or organization,
+or filter by access level, then expand a user to edit their role and tabs. Each
+entry shows current room approval, expiry and effective visible tabs. Use
+**Invitations & access dates** to add people, approve/block room access or adjust
+expiry in Investors. Individual PDF preview/download grants remain in
+**Permissions**, which also links back to User control. These settings apply only
+to the Investor Room.
 
 - **Investor:** only the selected content tabs; document previews and downloads
   still require individual document grants.
