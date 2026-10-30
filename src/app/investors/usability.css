@@ -174,7 +174,7 @@
   .ir-recognized { display: none; }
   .ir-identity-actions { flex-shrink: 0; }
   .ir-identity-actions .ir-signout { padding-inline: 8px; }
-  .ir-library-controls { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+  .ir-library-controls { grid-template-columns: minmax(0, 1fr) auto; align-items: flex-end; gap: 12px; }
   .investor-page .ir-category-toggle { display: block; align-self: end; }
   .ir-category-control { grid-column: 1 / -1; }
   .ir-library-controls[data-filters-open=false] .ir-category-control { display: none; }
@@ -183,3 +183,84 @@
   .investor-page:not(.ir-room-active) .ir-notice { order: -2; }
   .investor-page:not(.ir-room-active) .ir-room-coordinate { margin-top: 32px; }
 }
+
+/* The private Astra Dispatch: dated evidence and measured activity. */
+.ir-progress { color: var(--ir-paper); }
+.ir-progress-intro { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; margin: -6px 0 28px; }
+.ir-progress-intro p { margin: 0; font-size: 18px; color: var(--ir-muted); }
+.ir-progress-intro > span { font-size: 14px; color: var(--ir-muted); white-space: nowrap; }
+.ir-progress-summary { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--ir-line); padding: 24px 0; margin-bottom: 36px; gap: 20px; }
+.ir-progress-summary > div { display: flex; gap: 15px; align-items: center; }
+.ir-progress-summary strong { font-size: 36px; font-weight: 400; color: var(--ir-accent); line-height: 1; }
+.ir-progress-summary span { font-size: 15px; line-height: 1.5; color: var(--ir-muted); max-width: 150px; }
+.ir-progress-section-label { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.ir-progress-section-label h3, .ir-progress-toolbar h3 { font-size: 22px; font-weight: 400; margin: 0; }
+.ir-progress-section-label > span { font-size: 14px; color: var(--ir-muted); }
+.ir-progress-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 42px; }
+.ir-progress-metric { padding: 24px; background: linear-gradient(145deg, #12304485, #0a192a60); border: 1px solid var(--ir-line); min-width: 0; }
+.ir-progress-metric h3 { margin: 0 0 17px; font-size: 17px; font-weight: 400; color: var(--ir-muted); }
+.ir-progress-value { margin: 0 0 8px; font-size: 35px; line-height: 1.25; letter-spacing: -1px; color: var(--ir-accent); overflow-wrap: anywhere; }
+.ir-progress-value > span { font-size: 15px; color: var(--ir-muted); letter-spacing: 0; }
+.ir-progress-value > .ir-metric-pending { font-size: 22px; }
+.ir-progress-period { font-size: 13px; color: var(--ir-muted); margin: 0; }
+.ir-metric-bars { height: 42px; display: flex; align-items: flex-end; gap: 5px; margin: 20px 0 6px; }
+.ir-metric-bars > span { flex: 1; background: linear-gradient(0deg, #237482, #2be8f5a8); min-height: 2px; border-radius: 2px 2px 0 0; }
+.ir-progress details { margin-top: 18px; }
+.ir-progress summary { cursor: pointer; color: var(--ir-accent); font-size: 15px; line-height: 1.6; min-height: 44px; padding-block: 10px; }
+.ir-progress details p { font-size: 16px; line-height: 1.7; color: var(--ir-muted); margin: 10px 0; }
+.ir-progress details table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ir-progress details caption { text-align: left; padding-block: 10px; }
+.ir-progress details th, .ir-progress details td { border-bottom: 1px solid var(--ir-line); padding: 8px 0; text-align: left; font-weight: 400; }
+.ir-progress details td { text-align: right; font-variant-numeric: tabular-nums; }
+.ir-progress-toolbar { display: flex; gap: 24px; justify-content: space-between; align-items: flex-end; padding-top: 4px; }
+.ir-progress-toolbar p { margin: 10px 0 0; color: var(--ir-muted); font-size: 16px; line-height: 1.6; }
+.investor-page .ir-progress-toolbar label { width: 225px; flex-shrink: 0; font-size: 14px; }
+.ir-progress-toolbar select { margin-top: 8px; }
+.ir-progress-count { margin: 18px 0 28px; font-size: 14px; color: var(--ir-muted); }
+.ir-progress-timeline { list-style: none; padding: 0; margin: 0; }
+.ir-progress-timeline > li { position: relative; display: grid; grid-template-columns: 142px minmax(0, 1fr); gap: 28px; padding: 0 0 28px; }
+.ir-progress-timeline > li::before { content: ''; position: absolute; left: 155px; top: 15px; bottom: -15px; width: 1px; background: var(--ir-line); }
+.ir-progress-timeline > li:last-child::before { bottom: 40px; }
+.ir-progress-timeline > li::after { content: ''; position: absolute; left: 151px; top: 24px; width: 9px; height: 9px; border: 1px solid var(--ir-accent); background: #091b29; border-radius: 50%; box-shadow: 0 0 0 5px #091522; }
+.ir-progress-date { padding-top: 20px; font-size: 15px; line-height: 1.6; color: var(--ir-muted); }
+.ir-progress-date > span { display: block; font-size: 12px; margin-top: 6px; color: #7f9aaa; }
+.ir-progress-entry { padding: 23px 28px 13px; border: 1px solid var(--ir-line); background: #0c203184; min-width: 0; }
+.ir-progress-entry-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; color: var(--ir-muted); font-size: 14px; margin-bottom: 14px; }
+.ir-progress-status { padding: 3px 10px; border: 1px solid #6b91a45c; border-radius: 20px; font-size: 12px; line-height: 1.7; }
+.ir-progress-status-released { color: var(--ir-accent); border-color: #2be8f57a; background: #2be8f50a; }
+.ir-progress-status-research, .ir-progress-status-experiment { color: #dbcfa6; border-color: #dbcfa64a; }
+.ir-progress-entry h3 { font-size: 23px; line-height: 1.4; font-weight: 400; letter-spacing: -.3px; margin: 0 0 12px; }
+.ir-progress-entry > p { font-size: 17px; line-height: 1.75; color: #c2d3e0; margin: 0; }
+.ir-progress-entry details { margin-top: 6px; }
+.ir-progress-entry details .ir-progress-source { padding-top: 10px; border-top: 1px solid var(--ir-line); font-size: 14px; }
+.investor-page .ir-progress-more { display: block; margin: 2px 0 36px 170px; min-height: 48px; padding: 13px 24px; }
+.ir-dispatch-documents-title { font-size: 23px; font-weight: 400; margin: 30px 0 20px; }
+.ir-progress-compact .ir-progress-timeline > li { grid-template-columns: 142px minmax(0, 1fr); }
+@media (max-width: 1000px) {
+  .ir-progress-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ir-progress-summary > div { align-items: flex-start; flex-direction: column; gap: 10px; }
+}
+@media (max-width: 600px) {
+  .ir-progress-intro, .ir-progress-toolbar { display: block; }
+  .ir-progress-intro > span { display: block; margin-top: 12px; }
+  .ir-progress-summary { gap: 14px; padding-block: 20px; margin-bottom: 28px; }
+  .ir-progress-summary strong { font-size: 30px; }
+  .ir-progress-summary span { font-size: 13px; }
+  .ir-progress-metrics { grid-template-columns: 1fr; gap: 12px; margin-bottom: 30px; }
+  .ir-progress-metric { padding: 22px; }
+  .ir-progress-section-label { display: block; }
+  .ir-progress-section-label > span { display: block; margin-top: 8px; }
+  .investor-page .ir-progress-toolbar label { width: 100%; margin-top: 20px; }
+  .ir-progress-timeline > li, .ir-progress-compact .ir-progress-timeline > li { grid-template-columns: 1fr; gap: 10px; padding: 0 0 24px 24px; }
+  .ir-progress-timeline > li::before { left: 4px; top: 12px; bottom: -12px; }
+  .ir-progress-timeline > li::after { left: 0; top: 8px; }
+  .ir-progress-date { padding-top: 0; font-size: 14px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .ir-progress-date > span { font-size: 11px; margin: 0; }
+  .ir-progress-entry { padding: 20px 18px 10px; }
+  .ir-progress-entry h3 { font-size: 21px; }
+  .ir-progress-entry > p { font-size: 16px; line-height: 1.7; }
+  .ir-progress summary { font-size: 14px; }
+  .investor-page .ir-progress-more { margin: 0 0 30px 24px; width: calc(100% - 24px); }
+}
+
+.ir-progress-measurement-note { color: var(--ir-muted); font-size: 14px; line-height: 1.7; margin: -24px 0 36px; max-width: 90ch; }

@@ -1,0 +1,24 @@
+{
+  "name": "Astra investor progress \u2014 daily dispatch",
+  "automationId": "astra-investor-progress-daily-dispatch",
+  "kind": "heartbeat",
+  "status": "ACTIVE",
+  "time": "09:30",
+  "timezone": "Asia/Jerusalem",
+  "frequency": "daily",
+  "execution": "local desktop; computer on, app running, existing sessions required",
+  "owner": "Omer",
+  "requestedOn": "2026-10-30",
+  "issue": "https://github.com/Astra-via-Omer/Astra-WebSite/issues/14",
+  "projectItem": "https://github.com/users/Astra-via-Omer/projects/1/views/1?pane=issue&itemId=288565713",
+  "initialMilestones": 7,
+  "measuredMetrics": [
+    "Application requests",
+    "Compute allocated (vCPU-hours)"
+  ],
+  "unmeasuredMetrics": [
+    "Active users"
+  ],
+  "initialPrivatePublication": "Verified by generation-pinned SHA-256 read-back; details retained privately",
+  "validation": "24 tests passed; desktop 1440px and phone 350/390px browser checks passed"
+}
