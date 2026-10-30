@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { PDFDocumentLoadingTask, RenderTask } from 'pdfjs-dist';
 import type { InvestorDocument } from './InvestorExperience';
+import { loadPdfPreviewRenderer } from '@/investors/pdfPreview';
 
 type Props = {
   documents: InvestorDocument[];
@@ -52,9 +53,8 @@ export default function InvestorPublicationList({ documents, busy, loadPreview, 
     let task: PDFDocumentLoadingTask | undefined, render: RenderTask | undefined;
     setRenderedId(null); setError('');
     async function draw() {
-      const [pdfjs, blob] = await Promise.all([import('pdfjs-dist'), loadPreview(activeDocument!, controller.signal)]);
+      const [pdfjs, blob] = await Promise.all([loadPdfPreviewRenderer(), loadPreview(activeDocument!, controller.signal)]);
       if (controller.signal.aborted) return;
-      pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
       const data = new Uint8Array(await blob.arrayBuffer());
       if (controller.signal.aborted) return;
       task = pdfjs.getDocument({ data });
