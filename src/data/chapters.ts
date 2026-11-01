@@ -1,5 +1,11 @@
+export const purpose = {
+  mission: 'Help people and organisations make better decisions by making the evidence, reasoning and uncertainty behind important claims clear and open to examination.',
+  vision: 'A world where traceable, inspectable results are the foundation of trust in the AI era.',
+} as const;
+
 export const chapters = [
   { id: 'begin', label: 'Web3 · Result as a Service', title: 'Every claim\nneeds a path.', copy: 'Astra-Via is building Web3 RaaS — Result as a Service. Turning claims, evidence and reasoning into results you can inspect.', detail: 'Our approach starts with an inspectable review result: source connections, reasoning and the questions that still need validation.', image: '01-hero', node: 0 },
+  { id: 'purpose', label: 'Mission & vision', title: 'A clearer basis\nfor trust.', copy: purpose.mission, detail: purpose.vision, image: '09-vision', node: 2 },
   { id: 'noise', label: 'The challenge', title: 'More information.\nLess clarity.', copy: 'Documents and AI outputs can sound convincing while leaving their evidence unclear.', detail: 'The challenge starts when a persuasive story moves faster than our ability to inspect its foundations.', image: '02-problem', node: 0 },
   { id: 'claim', label: '01 / Identify', title: 'Start with\nthe claim.', copy: 'Separate important statements from the surrounding narrative.', detail: 'Bring the claims that matter into focus, so each can be examined on its own terms.', image: '03-claims', node: 0 },
   { id: 'source', label: '02 / Trace', title: 'See where\nit came from.', copy: 'Follow each extracted claim back to the words and pages behind it.', detail: 'An exact quotation creates a visible source connection. It is the beginning of investigation.', image: '04-sources', node: 1 },
@@ -7,7 +13,7 @@ export const chapters = [
   { id: 'gap', label: '04 / Question', title: 'Know what is\nstill missing.', copy: 'Surface evidence gaps and questions that need further validation.', detail: 'An unresolved question belongs in the picture. A source connection is not independent proof that a claim is true.', image: '06-gaps', node: 3 },
   { id: 'review', label: '05 / Refine', title: 'Review. Question.\nRefine.', copy: 'Bring your questions into the review and reassess the claims that matter.', detail: 'Make the review a conversation: examine a claim, add a question and revisit the assessment.', image: '07-workflow', node: 2 },
   { id: 'decisions', label: 'RaaS / The outcome', title: 'The result is\nthe service.', copy: 'An evidence-backed review, with its sources, reasoning and open questions. A clearer basis for your next decision.', detail: 'Result as a Service is our model: deliver an inspectable outcome for a defined question. Our current demo starts with document review; the ambition extends across domains.', image: '08-decisions', node: 1 },
-  { id: 'vision', label: 'Web3 / The vision', title: 'Results with\na traceable path.', copy: 'Our Web3 vision connects evidence, decentralized provenance and portable results — so the path behind an outcome stays visible.', detail: 'The planned Web3 layer combines blockchain provenance and decentralized evidence storage. These capabilities are part of the roadmap; the current demo explores document review.', image: '09-vision', node: 2 },
+  { id: 'vision', label: 'Web3 / The roadmap', title: 'Results with\na traceable path.', copy: 'Our Web3 roadmap connects evidence, decentralized provenance and portable results — so the path behind an outcome stays visible.', detail: 'The planned Web3 layer combines blockchain provenance and decentralized evidence storage. These capabilities are part of the roadmap; the current demo explores document review.', image: '09-vision', node: 2 },
   { id: 'explore', label: 'A new era / Astra-Via', title: 'Pioneering RaaS\nfor the AI era.', copy: 'Building a new era of Web3 Result as a Service. Start with a question. Follow the evidence. Inspect the result.', detail: 'Astra starts with experimental document review: connecting claims to quoted passages and exposing what still needs validation.', image: '10-invitation', node: 0 },
 ] as const;
 
