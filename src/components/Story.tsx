@@ -2,10 +2,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { chapters } from '@/data/chapters';
 import ReadingStory from './ReadingStory';
+import MissionVision from './MissionVision';
 import { SiteHeader, SiteFooter, useMotion } from './SiteChrome';
 const clamp = (v:number) => Math.max(0,Math.min(1,v));
 // Smootherstep keeps velocity and acceleration gentle at both ends.
 const ease = (v:number) => v*v*v*(v*(v*6-15)+10);
+const lastChapter = chapters.length - 1;
 export default function Story(){
   const {quiet}=useMotion();
   return quiet ? <ReadingStory /> : <AnimatedStory />;
@@ -15,7 +17,7 @@ function AnimatedStory(){
   const scenes=useRef<(HTMLDivElement|null)[]>([]);
   const activeRef=useRef(0), focusRef=useRef(false), reducedRef=useRef(false);
   const [active,setActive]=useState(0), [focused,setFocused]=useState(false);
-  const go=(i:number)=>{focusRef.current=false;setFocused(false);document.getElementById(chapters[Math.max(0,Math.min(9,i))].id)?.scrollIntoView({behavior:reducedRef.current?'instant':'smooth'});};
+  const go=(i:number)=>{focusRef.current=false;setFocused(false);document.getElementById(chapters[Math.max(0,Math.min(lastChapter,i))].id)?.scrollIntoView({behavior:reducedRef.current?'instant':'smooth'});};
   useEffect(()=>{
     const media=matchMedia('(prefers-reduced-motion: reduce)');
     const preference=()=>{reducedRef.current=media.matches;};
@@ -28,10 +30,10 @@ function AnimatedStory(){
       const smoothing=1-Math.exp(-4*dt);
       current+=(scrollY-current)*smoothing;px+=(mx-px)*smoothing;py+=(my-py)*smoothing;
       focusZoom+=((focusRef.current ? .1 : 0)-focusZoom)*(1-Math.exp(-3*dt));
-      const position=Math.max(0,Math.min(9,current/(innerHeight*2.3)));
+      const position=Math.max(0,Math.min(lastChapter,current/(innerHeight*2.3)));
       const base=Math.floor(position), local=position-base;
       const transition=ease(clamp((local-.3)/.7));
-      const selected=Math.min(9,base+(transition>=.5?1:0)), quiet=reducedRef.current;
+      const selected=Math.min(lastChapter,base+(transition>=.5?1:0)), quiet=reducedRef.current;
       if(selected!==activeRef.current){activeRef.current=selected;setActive(selected);focusRef.current=false;setFocused(false);}
       scenes.current.forEach((scene,i)=>{
         if(!scene)return;
@@ -49,7 +51,7 @@ function AnimatedStory(){
       world.current?.style.setProperty('--pointer-x',(quiet?0:px*8)+'px');world.current?.style.setProperty('--pointer-y',(quiet?0:py*6)+'px');
       world.current?.style.setProperty('--tilt',(quiet?0:px*-.8)+'deg');world.current?.style.setProperty('--travel',String(position));
       world.current?.style.setProperty('--bridge',String(quiet?0:Math.sin(transition*Math.PI)*.22));
-      if(bar.current)bar.current.style.transform='scaleX('+position/9+')';
+      if(bar.current)bar.current.style.transform='scaleX('+position/lastChapter+')';
       frame=requestAnimationFrame(render);
     };
     frame=requestAnimationFrame(render);addEventListener('pointermove',move,{passive:true});document.addEventListener('pointerleave',leave);
@@ -68,18 +70,18 @@ function AnimatedStory(){
           <div className="depth-lines"><i/><i/><i/></div>
         </div>
         <div className="scene-shade"/>
-        <div className="scene-words"><span className="scene-eyebrow">{c.label}</span><div className="scene-title">{c.title}</div><p>{c.copy}</p>{[0,7,8,9].includes(i)&&<div className="result-signature"><span>Web3</span><i/><span>RaaS</span><small>Result as a Service</small></div>}{i===8&&<div className="result-path"><span>Evidence</span><i>↗</i><span>Provenance</span><i>↗</i><span>Result</span></div>}</div>
+        <div className={'scene-words'+(c.id==='purpose'?' purpose-words':'')}><span className="scene-eyebrow">{c.label}</span><div className="scene-title">{c.title}</div>{c.id==='purpose'?<MissionVision />:<p>{c.copy}</p>}{(['begin','decisions','vision','explore'] as readonly string[]).includes(c.id)&&<div className="result-signature"><span>Web3</span><i/><span>RaaS</span><small>Result as a Service</small></div>}{c.id==='vision'&&<div className="result-path"><span>Evidence</span><i>↗</i><span>Provenance</span><i>↗</i><span>Result</span></div>}</div>
       </div>)}
       <div className="transition-glow"/><div className="particles">{Array.from({length:18},(_,i)=><i key={i} style={{left:(i*43%97)+'%',top:(i*31%91)+'%','--depth':(i%4+1)*.3} as React.CSSProperties}/>)}</div><div className="world-vignette"/>
     </div>
     <SiteHeader active="journey" />
     <noscript><a className="no-script" href="/story">Read the complete story without JavaScript</a></noscript>
-    <div className="journey-distance" aria-label="Astra-Via story">{chapters.map((c,i)=><section className="journey-stop" id={c.id} key={c.id} aria-label={c.label}><div className="screen-reader-copy">{i===0?<h1>{c.title}</h1>:<h2>{c.title}</h2>}<p>{c.copy}</p><p>{c.detail}</p></div></section>)}</div>
-    <div className="focus-point"><button className="focus-target" onClick={()=>{focusRef.current=!focusRef.current;setFocused(focusRef.current);}} aria-expanded={focused} aria-controls="focus-caption" aria-label={focused?'Zoom out of scene':'Move closer to this scene'}><span/>{focused?'Pull back':'Look closer'}</button>{focused&&<p id="focus-caption">{chapters[active].detail}</p>}</div>
+    <div className="journey-distance" aria-label="Astra-Via story">{chapters.map((c,i)=><section className="journey-stop" id={c.id} key={c.id} aria-label={c.label}><div className="screen-reader-copy">{i===0?<h1>{c.title}</h1>:<h2>{c.title}</h2>}{c.id==='purpose'?<MissionVision />:<><p>{c.copy}</p><p>{c.detail}</p></>}</div></section>)}</div>
+    {chapters[active].id!=='purpose'&&<div className="focus-point"><button className="focus-target" onClick={()=>{focusRef.current=!focusRef.current;setFocused(focusRef.current);}} aria-expanded={focused} aria-controls="focus-caption" aria-label={focused?'Zoom out of scene':'Move closer to this scene'}><span/>{focused?'Pull back':'Look closer'}</button>{focused&&<p id="focus-caption">{chapters[active].detail}</p>}</div>}
     <footer className="journey-controls" id="journey-controls" tabIndex={-1}>
-      <div className="journey-status" aria-live="polite"><span>{String(active+1).padStart(2,'0')} <small>/ 10</small></span><p>{chapters[active].label}</p></div>
+      <div className="journey-status" aria-live="polite"><span>{String(active+1).padStart(2,'0')} <small>/ {chapters.length}</small></span><p>{chapters[active].label}</p></div>
       <nav aria-label="Jump to a scene">{chapters.map((c,i)=><button key={c.id} aria-label={'Scene '+(i+1)+': '+c.label} aria-current={i===active?'step':undefined} onClick={()=>go(i)}><i/></button>)}</nav>
-      <div className="journey-direction"><button onClick={()=>go(active-1)} disabled={active===0} aria-label="Previous scene">↑</button><span>{active===9?'Scroll up to revisit':'Scroll to move through the story'}</span><button onClick={()=>go(active+1)} disabled={active===9} aria-label="Next scene">↓</button></div>
+      <div className="journey-direction"><button onClick={()=>go(active-1)} disabled={active===0} aria-label="Previous scene">↑</button><span>{active===lastChapter?'Scroll up to revisit':'Scroll to move through the story'}</span><button onClick={()=>go(active+1)} disabled={active===lastChapter} aria-label="Next scene">↓</button></div>
     </footer><SiteFooter floating /><div className="journey-progress"><i ref={bar}/></div>
   </main>;
 }

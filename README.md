@@ -1,6 +1,6 @@
 # Astra-Via public website
 
-The ten-scene Astra story becomes an immersive, full-screen journey. Scrolling drives camera-like zoom, lateral movement and blended transitions between the original slide environments. Pointer movement adds parallax to the background, artwork, orbital lines and foreground particles. “Look closer” zooms toward the current scene and reveals its supporting explanation.
+The eleven-scene Astra story becomes an immersive, full-screen journey. Scrolling drives camera-like zoom, lateral movement and blended transitions between the original slide environments. Pointer movement adds parallax to the background, artwork, orbital lines and foreground particles. “Look closer” zooms toward the current scene and reveals its supporting explanation. Mission and vision appear together immediately after the opening scene and are directly reachable through the shared navigation at `/#purpose`. The reading view includes the same statements.
 
 This standalone website lives in [Astra-WebSite](https://github.com/Astra-via-Omer/Astra-WebSite). Its public Cloud Run service defaults to `astra-website`. The authenticated personal workspace remains a separate repository and service.
 

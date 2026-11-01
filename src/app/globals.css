@@ -118,3 +118,20 @@ html[data-motion=reduced]{scroll-behavior:auto}html[data-motion=reduced] *,html[
 
 /* Keep every navigation item reachable as the public site grows. */
 @media(max-width:850px){.site-header nav{overflow-x:auto;justify-content:flex-start;gap:16px;padding-bottom:3px}.site-header nav a{white-space:nowrap;flex-shrink:0}}
+
+/* Mission and vision share the story's typography, light rules and cyan accents. */
+.purpose-words{width:46vw;max-width:620px}
+.purpose-words .scene-eyebrow{margin-bottom:20px}
+.purpose-words .scene-title{font-size:clamp(38px,4.4vw,68px);letter-spacing:-2px;line-height:1.1}
+.mission-vision{margin-top:28px}
+.mission-vision>section{padding:20px 0;border-top:1px solid #a7d4e23d}
+.mission-vision>section:last-child{padding-bottom:0}
+.mission-vision h3{font-size:11px;font-weight:400;line-height:1.5;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin:0 0 10px}
+.purpose-words .mission-vision p{font-size:clamp(16px,1.45vw,21px);line-height:1.65;max-width:540px;margin:0;color:#d0dde7}
+.reading-chapter .mission-vision h3{color:var(--cyan)}
+.reading-chapter .mission-vision p{margin:0}
+@media(max-width:1100px){.site-header{flex-wrap:wrap;padding:10px 4vw;gap:4px}.site-header img{width:122px;height:auto}.site-header>a{order:0;padding:8px 0}.site-header>button{order:1;margin-left:auto}.site-header nav{order:2;width:100%;margin-left:0;overflow-x:auto;justify-content:flex-start;gap:18px;padding-bottom:3px}.site-header nav a{white-space:nowrap;flex-shrink:0}}
+@media(max-width:900px){.purpose-words{width:86vw;max-width:580px;bottom:23%}.purpose-words .scene-title{font-size:42px}.purpose-words .scene-eyebrow{margin-bottom:14px}.purpose-words .mission-vision p{font-size:17px;line-height:1.6}.purpose-words .mission-vision{margin-top:22px}.purpose-words .mission-vision>section{padding-top:16px;padding-bottom:16px}.purpose-words .mission-vision>section:last-child{padding-bottom:0}}
+@media(max-width:650px){.purpose-words{width:90vw;bottom:29%;max-width:none}.purpose-words .scene-title{font-size:34px;letter-spacing:-1.2px}.purpose-words .scene-eyebrow{font-size:9px;margin-bottom:12px}.purpose-words .mission-vision{margin-top:18px}.purpose-words .mission-vision>section{padding:13px 0}.purpose-words .mission-vision>section:last-child{padding-bottom:0}.purpose-words .mission-vision h3{font-size:10px;letter-spacing:1.6px;margin-bottom:7px}.purpose-words .mission-vision p{font-size:15px;line-height:1.5}.journey-controls nav button{min-width:0;flex:1;max-width:34px}}
+@media(max-width:650px) and (max-height:740px){.purpose-words{bottom:34%}.purpose-words .scene-title{font-size:28px;line-height:1.05}.purpose-words .scene-eyebrow{margin-bottom:8px}.purpose-words .mission-vision{margin-top:14px}.purpose-words .mission-vision>section{padding:10px 0}.purpose-words .mission-vision h3{font-size:9px;line-height:1.4;margin-bottom:5px}.purpose-words .mission-vision p{font-size:14px;line-height:1.45}}
+@media print{.mission-vision h3{color:black!important}}

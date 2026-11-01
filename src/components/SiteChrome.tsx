@@ -23,6 +23,7 @@ export function SiteHeader({ active }: { active?: 'journey' | 'philosophy' | 'pr
     <Link href="/" aria-label="Astra-via home"><img src="/astra-logo.svg" alt="Astra-via" width="150" height="36" /></Link>
     <nav aria-label="Main navigation">
       <Link href="/" aria-current={active === 'journey' ? 'page' : undefined}>The journey</Link>
+      <a href={active === 'journey' ? '#purpose' : '/#purpose'}>Mission &amp; vision</a>
       <Link href="/philosophy" aria-current={active === 'philosophy' ? 'page' : undefined}>Philosophy</Link>
       <Link href="/what-we-can-do" aria-current={active === 'products' ? 'page' : undefined}>What we can do</Link>
       <Link href="/team" aria-current={active === 'team' ? 'page' : undefined}>Our team</Link>
