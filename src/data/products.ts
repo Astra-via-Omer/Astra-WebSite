@@ -13,6 +13,18 @@ export type Product = {
 
 export const products: Product[] = [
   {
+    id: 'sturgeon',
+    name: 'Sturgeon',
+    category: 'Political research',
+    stage: 'Early preview',
+    headline: 'Understand the position. Follow its evolution.',
+    description: 'Research one politician, party or government at a time. Upload its political agenda to understand its views and commitments, examine its claims against saved sources, and follow that same subject’s political record over time. Sturgeon has its own research process and evidence index, powered by Colossus.',
+    features: ['Political agendas & views', 'Claims with source quotations', 'Independent subject history'],
+    href: 'https://sturgeon.astra-via.com/',
+    action: 'Open Sturgeon',
+    note: 'Existing Astra account with separate product approval. Each political subject is researched independently; model assessments support human review.'
+  },
+  {
     id: 'workspace',
     name: 'Astra Workspace',
     category: 'Document review',
